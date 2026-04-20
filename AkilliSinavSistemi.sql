@@ -121,6 +121,7 @@ VALUES (1, '2026-06-10', 1);
 ----------------------------------------------------------------------------------------------------------
 
 --1.SP: Sýnav Ekleme
+GO
 CREATE PROCEDURE SinavEkle
     @DersID INT,
     @Tarih DATE,
@@ -132,6 +133,7 @@ BEGIN
 END
 
 --2.SP: Salon Atama
+GO
 CREATE PROCEDURE SalonAta
     @SinavID INT,
     @DerslikID INT
@@ -142,6 +144,7 @@ BEGIN
 END
 
 --3.SP: Gözetmen Atama
+GO
 CREATE PROCEDURE GozetmenAta
     @SinavSalonID INT,
     @PersonelID INT
