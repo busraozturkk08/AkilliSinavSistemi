@@ -155,3 +155,5 @@ BEGIN
 END
 
 ---------------------------------------------------------------------------------------------------------
+INSERT INTO Bolumler (BolumAd) VALUES ('ENERJÝ SÝSTEMLERÝ')
+SELECT * FROM Bolumler
