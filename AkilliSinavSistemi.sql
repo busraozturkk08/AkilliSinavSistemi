@@ -155,5 +155,6 @@ BEGIN
 END
 
 ---------------------------------------------------------------------------------------------------------
-INSERT INTO Bolumler (BolumAd) VALUES ('enerji sistemleri')
+INSERT INTO Bolumler (BolumAd) VALUES ('Enerji sistemleri')
 SELECT * FROM Bolumler
+
