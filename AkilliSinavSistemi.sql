@@ -388,3 +388,51 @@ BEGIN
     END
 END;
 
+-- 1. TRIGGER: Salon Çakýþma Güvenliði
+GO
+CREATE TRIGGER trg_SalonCakismaGuvenligi
+ON Sinav_Salonlari
+AFTER INSERT, UPDATE
+AS
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM inserted i
+        INNER JOIN Sinavlar s1 ON i.SinavID = s1.SinavID
+        -- Kendi tablosundaki AtamaID (PK) ile çakýþmalarý engelle
+        INNER JOIN Sinav_Salonlari ss ON i.DerslikID = ss.DerslikID AND i.AtamaID != ss.AtamaID
+        INNER JOIN Sinavlar s2 ON ss.SinavID = s2.SinavID
+        WHERE s1.Tarih = s2.Tarih AND s1.OturumID = s2.OturumID
+    )
+    BEGIN
+        ROLLBACK TRANSACTION;
+        THROW 50005, 'GÜVENLÝK ÝHLALÝ: Bu derslikte ayný gün ve oturumda zaten baþka bir sýnav yapýlýyor!', 1;
+    END
+END;
+
+GO
+-- 2. TRIGGER: Gözetmen Çakýþma Güvenliði
+CREATE TRIGGER trg_GozetmenCakismaGuvenligi
+ON Gozetmen_Atamalari
+AFTER INSERT, UPDATE
+AS
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM inserted i
+        -- Senin tablandaki SinavSalonID (YA), Sinav_Salonlari tablosundaki AtamaID (PK) ile eþleþiyor
+        INNER JOIN Sinav_Salonlari ss1 ON i.SinavSalonID = ss1.AtamaID
+        INNER JOIN Sinavlar s1 ON ss1.SinavID = s1.SinavID
+
+        -- Gözetmenin kendisi (AtamaID) hariç diðer atamalarýný bul
+        INNER JOIN Gozetmen_Atamalari ga ON i.PersonelID = ga.PersonelID AND i.AtamaID != ga.AtamaID
+        INNER JOIN Sinav_Salonlari ss2 ON ga.SinavSalonID = ss2.AtamaID
+        INNER JOIN Sinavlar s2 ON ss2.SinavID = s2.SinavID
+
+        WHERE s1.Tarih = s2.Tarih AND s1.OturumID = s2.OturumID
+    )
+    BEGIN
+        ROLLBACK TRANSACTION;
+        THROW 50006, 'GÜVENLÝK ÝHLALÝ: Bu personel ayný gün ve oturumda zaten baþka bir salonda görevli!', 1;
+    END
+END;
