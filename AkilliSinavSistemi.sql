@@ -158,3 +158,60 @@ END
 INSERT INTO Bolumler (BolumAd) VALUES ('Enerji sistemleri')
 SELECT * FROM Bolumler
 
+CREATE VIEW vw_GenelSinavProgrami AS
+SELECT 
+    d.DersKodu,
+    d.Ad AS DersAdi,
+    s.Tarih,
+    o.Tanim AS OturumTipi,
+    o.BaslangicSaat,
+    dl.Ad AS SalonAdi,
+    dl.Tip AS SalonTipi
+FROM Sinavlar s
+INNER JOIN Dersler d ON s.DersID = d.DersID
+INNER JOIN Oturumlar o ON s.OturumID = o.OturumID
+INNER JOIN Sinav_Salonlari ss ON s.SinavID = ss.SinavID
+INNER JOIN Derslikler dl ON ss.DerslikID = dl.DerslikID;
+
+CREATE VIEW vw_GozetmenGorevListesi AS
+SELECT 
+    p.Unvan,
+    p.Ad + ' ' + p.Soyad AS PersonelAdSoyad,
+    d.Ad AS DersAdi,
+    s.Tarih,
+    -- Saatleri 5 karakterlik metne (Örn: 09:00) çevirip öyle birleþtiriyoruz:
+    CAST(o.BaslangicSaat AS VARCHAR(5)) + ' - ' + CAST(o.BitisSaat AS VARCHAR(5)) AS ZamanAraligi,
+    dl.Ad AS SinavSalonu
+FROM Gozetmen_Atamalari ga
+INNER JOIN Personel p ON ga.PersonelID = p.PersonelID
+INNER JOIN Sinav_Salonlari ss ON ga.SinavSalonID = ss.AtamaID
+INNER JOIN Sinavlar s ON ss.SinavID = s.SinavID
+INNER JOIN Dersler d ON s.DersID = d.DersID
+INNER JOIN Oturumlar o ON s.OturumID = o.OturumID
+INNER JOIN Derslikler dl ON ss.DerslikID = dl.DerslikID;
+
+CREATE VIEW vw_PersonelMesguliyetDetay AS
+SELECT 
+    p.Ad + ' ' + p.Soyad AS Personel,
+    'Mazeret' AS Tur,
+    pd.Tarih,
+    NULL AS Saat,
+    pd.MazeretTuru AS Aciklama
+FROM Personel_Durum pd
+INNER JOIN Personel p ON pd.PersonelID = p.PersonelID
+WHERE pd.Uygun = 0
+
+UNION ALL
+
+SELECT 
+    p.Ad + ' ' + p.Soyad AS Personel,
+    'Sýnav Görevi' AS Tur,
+    s.Tarih,
+    o.BaslangicSaat AS Saat,
+    d.Ad + ' Sýnavý' AS Aciklama
+FROM Gozetmen_Atamalari ga
+INNER JOIN Personel p ON ga.PersonelID = p.PersonelID
+INNER JOIN Sinav_Salonlari ss ON ga.SinavSalonID = ss.AtamaID
+INNER JOIN Sinavlar s ON ss.SinavID = s.SinavID
+INNER JOIN Dersler d ON s.DersID = d.DersID
+INNER JOIN Oturumlar o ON s.OturumID = o.OturumID;
