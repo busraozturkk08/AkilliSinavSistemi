@@ -98,36 +98,6 @@ CREATE TABLE Gozetmen_Atamalari (
 GO
 
 -- ==========================================================================================
--- TEST VERÝLERÝNÝN EKLENMESÝ
--- ==========================================================================================
-
-INSERT INTO Bolumler (BolumAd) VALUES ('Yazýlým'), ('Elektrik'), ('Enerji sistemleri');
-
-INSERT INTO Dersler (DersKodu, Ad, OgrenciSayisi, Yariyil, BolumID)
-VALUES 
-('YZM101', 'Programlama', 80, 1, 1),
-('YZM202', 'Veritabaný', 120, 2, 1);
-
-INSERT INTO Derslikler (Ad, Kapasite, Tip)
-VALUES 
-('Amfi-1', 100, 'Amfi'),
-('Sinif-1', 50, 'Sinif');
-
-INSERT INTO Personel (Ad, Soyad, BolumID)
-VALUES 
-('Ahmet', 'Yýlmaz', 1),
-('Ayþe', 'Demir', 2);
-
-INSERT INTO Oturumlar (Tanim, BaslangicSaat, BitisSaat)
-VALUES 
-('Sabah-1', '09:00', '10:30'),
-('Ogle-1', '11:00', '12:30');
-
-INSERT INTO Sinavlar (DersID, Tarih, OturumID)
-VALUES (1, '2026-06-10', 1);
-GO
-
--- ==========================================================================================
 -- VIEWS (GÖRÜNÜMLER)
 -- ==========================================================================================
 
