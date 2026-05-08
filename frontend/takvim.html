@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SınavAsistan | Sınav Takvimi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-slate-50 text-slate-800">
+    <div class="flex min-h-screen">
+        <aside class="w-72 sidebar-gradient text-white p-6 shadow-2xl flex flex-col sticky top-0 h-screen">
+            <div class="flex items-center gap-3 mb-10 px-2"><div class="bg-violet-400 p-2 rounded-xl"><i data-lucide="shield-check" class="text-white"></i></div><h1 class="text-xl font-bold tracking-tight">SınavAsistan</h1></div>
+            <nav class="space-y-2 flex-1">
+                <a href="tanimlamalar.html" class="flex items-center gap-3 px-4 py-3 rounded-xl transition hover:bg-white/5 text-violet-200"><i data-lucide="settings" class="w-5 h-5"></i><span>Tanımlamalar</span></a>
+                <a href="mazeret.html" class="flex items-center gap-3 px-4 py-3 rounded-xl transition hover:bg-white/5 text-violet-200"><i data-lucide="user-x" class="w-5 h-5"></i><span>Hoca Mazeret</span></a>
+                <a href="planlama.html" class="flex items-center gap-3 px-4 py-3 rounded-xl transition hover:bg-white/5 text-violet-200"><i data-lucide="cpu" class="w-5 h-5"></i><span>Akıllı Planlama</span></a>
+                <a href="takvim.html" class="nav-btn-active flex items-center gap-3 px-4 py-3 rounded-xl transition"><i data-lucide="calendar" class="w-5 h-5"></i><span>Sınav Takvimi</span></a>
+            </nav>
+        </aside>
+
+        <main class="flex-1 p-10 overflow-y-auto animate-fadeIn">
+            <header class="mb-8"><h2 class="text-3xl font-extrabold text-slate-800">Sınav Programı</h2></header>
+            <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden overflow-x-auto">
+                <table class="w-full text-left border-collapse min-w-[600px]">
+                    <thead class="bg-slate-50 text-slate-500 text-xs uppercase tracking-widest">
+                        <tr><th class="p-5 border-b">Derslik / Saat</th><th class="p-5 border-b">09:00 - Slot 1</th><th class="p-5 border-b">11:00 - Slot 2</th></tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 text-sm">
+                        <tr><td class="p-5 font-bold bg-slate-50/50">Amfi-1 (70)</td><td class="p-5"><div class="p-3 bg-indigo-50 border-l-4 border-indigo-500 text-indigo-700 font-bold rounded">Veritabanı</div></td><td class="p-5"><span class="text-slate-300">Boş</span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+    
+    <script>lucide.createIcons();</script>
+</body>
+</html>
