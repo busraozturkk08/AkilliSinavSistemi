@@ -104,6 +104,8 @@ GO
 CREATE NONCLUSTERED INDEX IX_Sinavlar_DersID ON Sinavlar(DersID);
 CREATE NONCLUSTERED INDEX IX_GozetmenAtamalari_PersonelID ON Gozetmen_Atamalari(PersonelID);
 CREATE NONCLUSTERED INDEX IX_PersonelDurum_Tarih ON Personel_Durum(Tarih);
+CREATE NONCLUSTERED INDEX IX_SinavSalonlari_SinavID ON Sinav_Salonlari(SinavID);
+CREATE NONCLUSTERED INDEX IX_SinavSalonlari_DerslikID ON Sinav_Salonlari(DerslikID);
 GO
 
 -- ==========================================================================================
@@ -192,8 +194,8 @@ BEGIN
     SELECT @ToplamKapasite = ISNULL(SUM(d.Kapasite), 0)
     FROM Sinav_Salonlari ss
     INNER JOIN Derslikler d ON ss.DerslikID = d.DerslikID
-    WHERE ss.SinavID = @SinavID;
-
+    WHERE ss.SinavID = @SinavID
+    AND d.Aktif = 1;
     RETURN @ToplamKapasite;
 END;
 GO
@@ -281,7 +283,7 @@ FROM Sinavlar s
 INNER JOIN Dersler d ON s.DersID = d.DersID;
 GO
 
---View 5:Adil daðýtýmý gösteren view
+--View 5: Adil daðýtýmý gösteren view
 CREATE VIEW vw_GozetmenYukDagilimi AS
 SELECT 
     p.Ad + ' ' + p.Soyad AS PersonelAdSoyad,
@@ -357,11 +359,15 @@ AS
 BEGIN
     DECLARE @Yariyil INT;
     DECLARE @DersTuru NVARCHAR(50);
+    DECLARE @BolumID INT;
     DECLARE @CakismaSayisi INT;
     DECLARE @GunlukSinavSayisi INT;
 
-    SELECT @Yariyil = Yariyil, @DersTuru = DersTuru 
+    SELECT @Yariyil = Yariyil, @DersTuru = DersTuru, @BolumID = BolumID
     FROM Dersler WHERE DersID = @DersID;
+
+    IF @Yariyil IS NULL
+    THROW 50007, 'HATA: Geçersiz DersID!', 1;
 
     -- Sadece zorunlu dersler için yarýyýl/oturum çakýþma kontrolü
     IF @DersTuru = 'Zorunlu'
@@ -370,13 +376,14 @@ BEGIN
         FROM Sinavlar s
         INNER JOIN Dersler d ON s.DersID = d.DersID
         WHERE d.Yariyil = @Yariyil 
+          AND d.BolumID = @BolumID
           AND d.DersTuru = 'Zorunlu' 
           AND s.Tarih = @Tarih 
           AND s.OturumID = @OturumID;
 
         IF @CakismaSayisi > 0
         BEGIN
-            THROW 50003, 'KURAL HATASI: Ayný yarýyýla ait iki zorunlu dersin sýnavý ayný oturuma konulamaz!', 1;
+            ;THROW 50003, 'KURAL HATASI: Ayný yarýyýla ait iki zorunlu dersin sýnavý ayný oturuma konulamaz!', 1;
         END
     END
 
@@ -385,6 +392,7 @@ BEGIN
     FROM Sinavlar s
     INNER JOIN Dersler d ON s.DersID = d.DersID
     WHERE d.Yariyil = @Yariyil 
+      AND d.BolumID = @BolumID
       AND s.Tarih = @Tarih;
 
     IF @GunlukSinavSayisi >= 2
@@ -394,7 +402,6 @@ BEGIN
               '. yarýyýl için 2den fazla sýnav planlanýyor!';
     END
 
-    -- Sýnavý ekle
     INSERT INTO Sinavlar (DersID, Tarih, OturumID)
     VALUES (@DersID, @Tarih, @OturumID);
 END;
@@ -403,58 +410,89 @@ GO
 -- 2. SP: Salon Atama (Derslik aktiflik denetimi + kapasite kontrolü)
 CREATE PROCEDURE SalonAta
     @SinavID INT,
-    @DerslikID INT
+    @DerslikID INT = NULL
 AS
 BEGIN
-    DECLARE @AktifMi BIT;
-    DECLARE @GerekenKapasite INT;
-    DECLARE @MevcutKapasite INT;
-    DECLARE @YeniSalonKapasite INT;
+    DECLARE @GerekenKapasite INT, @MevcutKapasite INT, @SalonKapasite INT;
+    DECLARE @Tarih DATE, @OturumID INT, @HedefKat INT;
 
-    -- Derslik aktif mi kontrolü
-    SELECT @AktifMi = Aktif FROM Derslikler WHERE DerslikID = @DerslikID;
-
-    IF @AktifMi IS NULL
-    BEGIN
-        THROW 50007, 'HATA: Böyle bir derslik bulunamadý!', 1;
-    END
-
-    IF @AktifMi = 0
-    BEGIN
-        THROW 50001, 'HATA: Bu derslik aktif kullanýmda deðil!', 1;
-    END
-
-    -- Sýnav için gereken öðrenci kapasitesi
-    SELECT @GerekenKapasite = d.OgrenciSayisi
-    FROM Sinavlar s
+    SELECT @Tarih = s.Tarih, @OturumID = s.OturumID, @GerekenKapasite = d.OgrenciSayisi
+    FROM Sinavlar s 
     INNER JOIN Dersler d ON s.DersID = d.DersID
     WHERE s.SinavID = @SinavID;
 
-    -- Þu ana kadar bu sýnava atanmýþ toplam kapasite
-    SET @MevcutKapasite = dbo.fn_SinavAtananToplamKapasite(@SinavID);
-
-    -- Eklenecek salonun kapasitesi
-    SELECT @YeniSalonKapasite = Kapasite FROM Derslikler WHERE DerslikID = @DerslikID;
-
-    -- Salon atamasýný yap
-    INSERT INTO Sinav_Salonlari (SinavID, DerslikID)
-    VALUES (@SinavID, @DerslikID);
-
-    -- Ekleme sonrasý kapasite yeterli mi kontrolü (uyarý amaçlý)
-    IF (@MevcutKapasite + @YeniSalonKapasite) < @GerekenKapasite
+    -- Manuel Mod
+    IF @DerslikID IS NOT NULL
     BEGIN
-        PRINT 'UYARI: Atanan toplam kapasite (' + 
-              CAST(@MevcutKapasite + @YeniSalonKapasite AS VARCHAR(10)) + 
-              ') hâlâ yetersiz! Gereken: ' + 
-              CAST(@GerekenKapasite AS VARCHAR(10)) + 
-              ' — Ek salon atamasý yapýlmalýdýr.';
+        IF NOT EXISTS(SELECT 1 FROM Derslikler WHERE DerslikID = @DerslikID AND Aktif = 1)
+            THROW 50001, 'HATA: Derslik bulunamadý veya aktif deðil!', 1;
+
+        INSERT INTO Sinav_Salonlari (SinavID, DerslikID) VALUES (@SinavID, @DerslikID);
+
+        -- Kapasite uyarýsý
+        SET @MevcutKapasite = dbo.fn_SinavAtananToplamKapasite(@SinavID);
+        IF @MevcutKapasite < @GerekenKapasite
+            PRINT 'UYARI: Kapasite hâlâ yetersiz! Gereken: ' + 
+                  CAST(@GerekenKapasite AS VARCHAR(10)) + 
+                  ', Atanan: ' + CAST(@MevcutKapasite AS VARCHAR(10));
+        ELSE
+            PRINT 'BÝLGÝ: Kapasite yeterli. Atanan: ' + 
+                  CAST(@MevcutKapasite AS VARCHAR(10)) + 
+                  ' / Gereken: ' + CAST(@GerekenKapasite AS VARCHAR(10));
     END
+
+    -- Otomatik Mod
     ELSE
     BEGIN
-        PRINT 'BILGI: Kapasite yeterli. Toplam atanan: ' + 
-              CAST(@MevcutKapasite + @YeniSalonKapasite AS VARCHAR(10)) + 
-              ' / Gereken: ' + 
-              CAST(@GerekenKapasite AS VARCHAR(10));
+        SET @MevcutKapasite = dbo.fn_SinavAtananToplamKapasite(@SinavID);
+
+        -- Daha önce atanan salon varsa onun katýný hedef kat yap
+        SET @HedefKat = NULL;
+        SELECT TOP 1 @HedefKat = d.Kat 
+        FROM Sinav_Salonlari ss 
+        INNER JOIN Derslikler d ON ss.DerslikID = d.DerslikID 
+        WHERE ss.SinavID = @SinavID;
+
+        WHILE @MevcutKapasite < @GerekenKapasite
+        BEGIN
+            SET @DerslikID = NULL;
+
+            SELECT TOP 1 
+                @DerslikID = d.DerslikID, 
+                @SalonKapasite = d.Kapasite
+            FROM Derslikler d
+            WHERE d.Aktif = 1
+              AND d.DerslikID NOT IN (
+                  SELECT DerslikID FROM Sinav_Salonlari 
+                  WHERE SinavID = @SinavID
+              )
+              AND d.DerslikID NOT IN (
+                  SELECT ss.DerslikID FROM Sinav_Salonlari ss
+                  INNER JOIN Sinavlar s ON ss.SinavID = s.SinavID
+                  WHERE s.Tarih = @Tarih AND s.OturumID = @OturumID
+              )
+            ORDER BY 
+                CASE WHEN @HedefKat IS NOT NULL AND d.Kat = @HedefKat THEN 0 ELSE 1 END,
+                d.Kapasite DESC;
+
+            IF @DerslikID IS NULL
+            BEGIN
+                PRINT 'UYARI: Müsait salon kalmadý, yeterli kapasite saðlanamadý!';
+                BREAK;
+            END
+
+            INSERT INTO Sinav_Salonlari (SinavID, DerslikID) VALUES (@SinavID, @DerslikID);
+            
+            -- Ýlk atamadan sonra hedef katý belirle
+            IF @HedefKat IS NULL
+                SELECT @HedefKat = Kat FROM Derslikler WHERE DerslikID = @DerslikID;
+
+            SET @MevcutKapasite = @MevcutKapasite + @SalonKapasite;
+        END
+
+        PRINT 'BÝLGÝ: Otomatik atama tamamlandý. Atanan: ' + 
+              CAST(@MevcutKapasite AS VARCHAR(10)) + 
+              ' / Gereken: ' + CAST(@GerekenKapasite AS VARCHAR(10));
     END
 END;
 GO
@@ -462,52 +500,130 @@ GO
 -- 3. SP: Gözetmen Atama (Günlük Art Arda 3 Görev Sýnýrý,Müsaitlik Korumalý)
 CREATE PROCEDURE GozetmenAta
     @SinavSalonID INT,
-    @PersonelID INT
+    @PersonelID INT = NULL
 AS
 BEGIN
     DECLARE @Tarih DATE;
     DECLARE @OturumID INT;
-    DECLARE @OturumSira INT;
-    DECLARE @ArtArdaGorevSayisi INT;
+    DECLARE @DersBolumID INT;
+    DECLARE @OturumSirasi INT;
 
-    -- Atanacak salonun tarih ve oturum bilgisini al
-    SELECT @Tarih = s.Tarih, @OturumID = s.OturumID
+    SELECT 
+        @Tarih = s.Tarih, 
+        @OturumID = s.OturumID,
+        @DersBolumID = d.BolumID
     FROM Sinav_Salonlari ss
     INNER JOIN Sinavlar s ON ss.SinavID = s.SinavID
+    INNER JOIN Dersler d ON s.DersID = d.DersID
     WHERE ss.AtamaID = @SinavSalonID;
 
-    -- Atanacak oturumun sýra numarasýný al
-    SELECT @OturumSira = OturumID FROM Oturumlar WHERE OturumID = @OturumID;
+    SELECT @OturumSirasi = SiraNo
+    FROM (
+        SELECT OturumID, ROW_NUMBER() OVER (ORDER BY BaslangicSaat) AS SiraNo
+        FROM Oturumlar
+    ) t
+    WHERE OturumID = @OturumID;
 
-    -- Hemen önceki 3 oturuma art arda atanmýþ mý kontrolü
-    -- (Atanacak oturum dahil, geriye doðru 3 ardýþýk oturuma bakýyoruz)
-    SELECT @ArtArdaGorevSayisi = COUNT(DISTINCT s.OturumID)
-    FROM Gozetmen_Atamalari ga
-    INNER JOIN Sinav_Salonlari ss ON ga.SinavSalonID = ss.AtamaID
-    INNER JOIN Sinavlar s ON ss.SinavID = s.SinavID
-    WHERE ga.PersonelID = @PersonelID
-      AND s.Tarih = @Tarih
-      AND s.OturumID IN (
-          @OturumSira - 1,
-          @OturumSira - 2,
-          @OturumSira - 3
-      );
-
-    -- Önceki 3 oturum da doluysa bu oturuma atanamaz
-    IF @ArtArdaGorevSayisi = 3
+    IF @PersonelID IS NOT NULL
     BEGIN
-        THROW 50004, 'KURAL HATASI: Gözetmen art arda 3 oturumda görev aldý, bu oturuma atanamaz! Bir sonraki oturuma atanabilir.', 1;
-    END
+        IF dbo.fn_PersonelMusaitMi(@PersonelID, @Tarih, @OturumID) = 0
+            THROW 50002, 'HATA: Personel bu tarihte müsait deðil!', 1;
 
-    -- Müsaitlik kontrolü
-    IF dbo.fn_PersonelMusaitMi(@PersonelID, @Tarih, @OturumID) = 1
-    BEGIN
-        INSERT INTO Gozetmen_Atamalari (SinavSalonID, PersonelID)
+        DECLARE @GeriZincir INT = 0;
+        DECLARE @IleriZincir INT = 0;
+        DECLARE @Dongu INT;
+        DECLARE @KontrolOturumID INT;
+
+        -- Geriye Dönük Kontrol
+        SET @Dongu = 1;
+        WHILE @Dongu <= 3
+        BEGIN
+            SET @KontrolOturumID = NULL;
+
+            SELECT @KontrolOturumID = OturumID FROM (
+                SELECT OturumID, ROW_NUMBER() OVER (ORDER BY BaslangicSaat) AS SiraNo 
+                FROM Oturumlar
+            ) t WHERE SiraNo = @OturumSirasi - @Dongu;
+
+            IF @KontrolOturumID IS NOT NULL AND EXISTS (
+                SELECT 1 FROM Gozetmen_Atamalari ga
+                INNER JOIN Sinav_Salonlari ss ON ga.SinavSalonID = ss.AtamaID
+                INNER JOIN Sinavlar s ON ss.SinavID = s.SinavID
+                WHERE ga.PersonelID = @PersonelID 
+                  AND s.Tarih = @Tarih 
+                  AND s.OturumID = @KontrolOturumID
+            )
+                SET @GeriZincir = @GeriZincir + 1;
+            ELSE BREAK;
+
+            SET @Dongu = @Dongu + 1;
+        END
+
+        -- Ýleriye Dönük Kontrol
+        SET @Dongu = 1;
+        WHILE @Dongu <= 3
+        BEGIN
+            SET @KontrolOturumID = NULL;
+
+            SELECT @KontrolOturumID = OturumID FROM (
+                SELECT OturumID, ROW_NUMBER() OVER (ORDER BY BaslangicSaat) AS SiraNo 
+                FROM Oturumlar
+            ) t WHERE SiraNo = @OturumSirasi + @Dongu;
+
+            IF @KontrolOturumID IS NOT NULL AND EXISTS (
+                SELECT 1 FROM Gozetmen_Atamalari ga
+                INNER JOIN Sinav_Salonlari ss ON ga.SinavSalonID = ss.AtamaID
+                INNER JOIN Sinavlar s ON ss.SinavID = s.SinavID
+                WHERE ga.PersonelID = @PersonelID 
+                  AND s.Tarih = @Tarih 
+                  AND s.OturumID = @KontrolOturumID
+            )
+                SET @IleriZincir = @IleriZincir + 1;
+            ELSE BREAK;
+
+            SET @Dongu = @Dongu + 1;
+        END
+
+        IF (@GeriZincir + @IleriZincir + 1) > 3
+            THROW 50004, 'KURAL HATASI: Bu atama yapýlýrsa gözetmen art arda 3ten fazla oturumda görev almýþ olacak!', 1;
+
+        INSERT INTO Gozetmen_Atamalari (SinavSalonID, PersonelID) 
         VALUES (@SinavSalonID, @PersonelID);
+        PRINT 'BÝLGÝ: Manuel atama baþarýyla yapýldý.';
     END
+
     ELSE
     BEGIN
-        THROW 50002, 'HATA: Personel bu tarihte müsait deðil (Mazeretli veya Çakýþma)!', 1;
+        SELECT TOP 1 @PersonelID = p.PersonelID
+        FROM Personel p
+        WHERE dbo.fn_PersonelMusaitMi(p.PersonelID, @Tarih, @OturumID) = 1
+          AND (
+              SELECT COUNT(*)
+              FROM Gozetmen_Atamalari ga2
+              INNER JOIN Sinav_Salonlari ss2 ON ga2.SinavSalonID = ss2.AtamaID
+              INNER JOIN Sinavlar s2 ON ss2.SinavID = s2.SinavID
+              INNER JOIN (
+                  SELECT OturumID, ROW_NUMBER() OVER (ORDER BY BaslangicSaat) AS SiraNo 
+                  FROM Oturumlar
+              ) o2 ON s2.OturumID = o2.OturumID
+              WHERE ga2.PersonelID = p.PersonelID 
+                AND s2.Tarih = @Tarih 
+                AND o2.SiraNo >= @OturumSirasi - 2 
+                AND o2.SiraNo < @OturumSirasi + 2
+          ) < 3
+        ORDER BY 
+            CASE WHEN p.BolumID = @DersBolumID THEN 0 ELSE 1 END ASC,
+            dbo.fn_GozetmenToplamGorev(p.PersonelID) ASC;
+
+        IF @PersonelID IS NULL
+        BEGIN
+            PRINT 'UYARI: Havuzda uygun gözetmen bulunamadý!';
+            RETURN;
+        END
+
+        INSERT INTO Gozetmen_Atamalari (SinavSalonID, PersonelID) 
+        VALUES (@SinavSalonID, @PersonelID);
+        PRINT 'BÝLGÝ: Otomatik atama yapýldý. PersonelID: ' + CAST(@PersonelID AS VARCHAR(10));
     END
 END;
 GO
@@ -632,39 +748,39 @@ VALUES
 -- ==========================================================================================
 
 -- 1 HAZÝRAN PAZARTESÝ
-EXEC SinavEkle @DersID = 1,  @Tarih = '2026-06-01', @OturumID = 1; -- YZM101 Algoritma (Yazýlým-1)
-EXEC SinavEkle @DersID = 21, @Tarih = '2026-06-01', @OturumID = 1; -- ENR101 Temel Elektronik (Enerji-1)
-EXEC SinavEkle @DersID = 11, @Tarih = '2026-06-01', @OturumID = 2; -- MAK201 Mukavemet (Makine-3)
-EXEC SinavEkle @DersID = 6,  @Tarih = '2026-06-01', @OturumID = 2; -- ELK101 Elektronik (Elektrik-2)
-EXEC SinavEkle @DersID = 16, @Tarih = '2026-06-01', @OturumID = 3; -- MEK101 Statik (Mekatronik-2)
+EXEC SinavEkle @DersID = 1,  @Tarih = '2026-06-01', @OturumID = 1; -- YZM101
+EXEC SinavEkle @DersID = 16, @Tarih = '2026-06-01', @OturumID = 1; -- ENR101 
+EXEC SinavEkle @DersID = 11, @Tarih = '2026-06-01', @OturumID = 2; -- MAK201 
+EXEC SinavEkle @DersID = 21,  @Tarih = '2026-06-01', @OturumID = 2; -- ELK101 
+EXEC SinavEkle @DersID = 6, @Tarih = '2026-06-01', @OturumID = 3; -- MEK101 
 
 -- 2 HAZÝRAN SALI
-EXEC SinavEkle @DersID = 2,  @Tarih = '2026-06-02', @OturumID = 1; -- YZM202 Veritabaný (Yazýlým-4)
-EXEC SinavEkle @DersID = 7,  @Tarih = '2026-06-02', @OturumID = 1; -- ELK102 Elektrik Devreleri (Elektrik-2)
-EXEC SinavEkle @DersID = 12, @Tarih = '2026-06-02', @OturumID = 2; -- MAK202 Dinamik (Makine-3)
-EXEC SinavEkle @DersID = 22, @Tarih = '2026-06-02', @OturumID = 2; -- ENR201 Statik (Enerji-3)
-EXEC SinavEkle @DersID = 17, @Tarih = '2026-06-02', @OturumID = 3; -- MEK201 Makine Teorisi (Mekatronik-4)
+EXEC SinavEkle @DersID = 2,  @Tarih = '2026-06-02', @OturumID = 1; -- YZM202
+EXEC SinavEkle @DersID = 22, @Tarih = '2026-06-02', @OturumID = 1; -- ELK102 
+EXEC SinavEkle @DersID = 12, @Tarih = '2026-06-02', @OturumID = 2; -- MAK202
+EXEC SinavEkle @DersID = 17, @Tarih = '2026-06-02', @OturumID = 2; -- ENR201 
+EXEC SinavEkle @DersID = 7,  @Tarih = '2026-06-02', @OturumID = 3; -- MEK201
 
 -- 3 HAZÝRAN ÇARÞAMBA
-EXEC SinavEkle @DersID = 3,  @Tarih = '2026-06-03', @OturumID = 1; -- YZM203 Veri Yapýlarý (Yazýlým-3)
-EXEC SinavEkle @DersID = 8,  @Tarih = '2026-06-03', @OturumID = 1; -- ELK201 Bilg. Destekli Çizim (Elektrik-4)
-EXEC SinavEkle @DersID = 13, @Tarih = '2026-06-03', @OturumID = 2; -- MAK301 Üretim Yöntemleri (Makine-5)
-EXEC SinavEkle @DersID = 23, @Tarih = '2026-06-03', @OturumID = 2; -- ENR301 Rüzgar En. (Enerji-5)
-EXEC SinavEkle @DersID = 18, @Tarih = '2026-06-03', @OturumID = 3; -- MEK202 Termodinamik (Mekatronik-4)
+EXEC SinavEkle @DersID = 3,  @Tarih = '2026-06-03', @OturumID = 1; -- YZM203
+EXEC SinavEkle @DersID = 23, @Tarih = '2026-06-03', @OturumID = 1; -- ELK201
+EXEC SinavEkle @DersID = 13, @Tarih = '2026-06-03', @OturumID = 2; -- MAK301
+EXEC SinavEkle @DersID = 18, @Tarih = '2026-06-03', @OturumID = 2; -- ENR301
+EXEC SinavEkle @DersID = 8,  @Tarih = '2026-06-03', @OturumID = 3; -- MEK202
 
 -- 4 HAZÝRAN PERÞEMBE
-EXEC SinavEkle @DersID = 5,  @Tarih = '2026-06-04', @OturumID = 1; -- YZM201 Nesne Yönelik (Yazýlým-3)
-EXEC SinavEkle @DersID = 9,  @Tarih = '2026-06-04', @OturumID = 1; -- ELK301 Elektromanyetik (Elektrik-5)
-EXEC SinavEkle @DersID = 14, @Tarih = '2026-06-04', @OturumID = 2; -- MAK102 Ýstatistik (Makine-2)
-EXEC SinavEkle @DersID = 24, @Tarih = '2026-06-04', @OturumID = 2; -- ENR302 Isý Transferleri (Enerji-6)
-EXEC SinavEkle @DersID = 19, @Tarih = '2026-06-04', @OturumID = 3; -- MEK401 Robotik (Mekatronik-7)
+EXEC SinavEkle @DersID = 5,  @Tarih = '2026-06-04', @OturumID = 1; -- YZM201
+EXEC SinavEkle @DersID = 24, @Tarih = '2026-06-04', @OturumID = 1; -- ELK301
+EXEC SinavEkle @DersID = 14, @Tarih = '2026-06-04', @OturumID = 2; -- MAK102
+EXEC SinavEkle @DersID = 19, @Tarih = '2026-06-04', @OturumID = 2; -- ENR302
+EXEC SinavEkle @DersID = 9,  @Tarih = '2026-06-04', @OturumID = 3; -- MEK401
 
 -- 5 HAZÝRAN CUMA
-EXEC SinavEkle @DersID = 4,  @Tarih = '2026-06-05', @OturumID = 1; -- YZM301 Yazýlým Sýnama (Yazýlým-6)
-EXEC SinavEkle @DersID = 10, @Tarih = '2026-06-05', @OturumID = 1; -- ELK302 Sensörler (Elektrik-6)
-EXEC SinavEkle @DersID = 15, @Tarih = '2026-06-05', @OturumID = 2; -- MAK302 Isý Transferi (Makine-6)
-EXEC SinavEkle @DersID = 25, @Tarih = '2026-06-05', @OturumID = 2; -- ENR202 Makine Elemanlarý (Enerji-4)
-EXEC SinavEkle @DersID = 20, @Tarih = '2026-06-05', @OturumID = 3; -- MEK301 Elektrik Makinalarý (Mekatronik-5)
+EXEC SinavEkle @DersID = 4,  @Tarih = '2026-06-05', @OturumID = 1; -- YZM301
+EXEC SinavEkle @DersID = 25, @Tarih = '2026-06-05', @OturumID = 1; -- ELK302
+EXEC SinavEkle @DersID = 15, @Tarih = '2026-06-05', @OturumID = 2; -- MAK302
+EXEC SinavEkle @DersID = 20, @Tarih = '2026-06-05', @OturumID = 2; -- ENR202
+EXEC SinavEkle @DersID = 10, @Tarih = '2026-06-05', @OturumID = 3; -- MEK301
 
 -- ==========================================================================================
 -- SALONLARIN SAKLI YORDAMLAR (SP) ÝLE KAYDEDÝLMESÝ
