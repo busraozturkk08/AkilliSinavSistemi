@@ -96,6 +96,13 @@ CREATE TABLE Gozetmen_Atamalari (
     FOREIGN KEY (SinavSalonID) REFERENCES Sinav_Salonlari(AtamaID),
     FOREIGN KEY (PersonelID) REFERENCES Personel(PersonelID)
 );
+
+CREATE TABLE Donem_Ayarlari (
+    AyarID INT PRIMARY KEY DEFAULT 1,
+    DonemBaslangicTarihi DATE NOT NULL, -- Ýsim güncellendi
+    DonemBitisTarihi DATE NOT NULL,     -- Ýsim güncellendi
+    CONSTRAINT CHK_TekSatir CHECK (AyarID = 1) 
+);
 GO
 
 -- ==========================================================================================
@@ -357,6 +364,18 @@ CREATE PROCEDURE SinavEkle
     @OturumID INT
 AS
 BEGIN
+    DECLARE @DonemBaslangic DATE;
+    DECLARE @DonemBitis DATE;
+
+    SELECT @DonemBaslangic = DonemBaslangicTarihi, @DonemBitis = DonemBitisTarihi
+    FROM Donem_Ayarlari 
+    WHERE AyarID = 1;
+
+    -- Tarih kontrolü
+    IF @Tarih < @DonemBaslangic OR @Tarih > @DonemBitis
+    BEGIN
+        ;THROW 50008, 'HATA: Girilen sýnav tarihi, belirlenen dönem aralýðýnýn dýþýndadýr!', 1;
+    END
     DECLARE @Yariyil INT;
     DECLARE @DersTuru NVARCHAR(50);
     DECLARE @BolumID INT;
@@ -742,6 +761,11 @@ VALUES
 
 -- 5 HAZÝRAN CUMA
 (9, '2026-06-05', 'Mazeret Ýzni', 0);
+
+-- Dönem Baþlangýç ve Bitiþ Tarihlerini Belirleme
+INSERT INTO Donem_Ayarlari (AyarID, DonemBaslangicTarihi, DonemBitisTarihi)
+VALUES (1, '2026-02-09', '2026-06-26');
+GO
 
 -- ==========================================================================================
 -- SINAVLARIN SAKLI YORDAMLAR (SP) ÝLE KAYDEDÝLMESÝ
