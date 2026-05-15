@@ -168,6 +168,26 @@ app.post('/api/Oturum', async (req, res) => {
     }
 });
 
+// Sınav Ekleme Ekranı: Dönem Ayarlarını Takvim İçin Çekme
+app.get('/api/donem-ayarlari', async (req, res) => {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .query('SELECT DonemBaslangicTarihi, DonemBitisTarihi FROM Donem_Ayarlari WHERE AyarID = 1');
+
+        if (result.recordset.length > 0) {
+            res.json({
+                baslangic: result.recordset[0].DonemBaslangicTarihi,
+                bitis: result.recordset[0].DonemBitisTarihi
+            });
+        } else {
+            res.status(404).json({ hata: "Dönem ayarları veritabanında bulunamadı." });
+        }
+    } catch (err) { 
+        res.status(500).json({ hata: err.message }); 
+    }
+});
+
 // ==========================================================================
 // 3. PUT (GÜNCELLEME) ENDPOINT'LERİ - Frontend Düzenleme İşlemleri İçin
 // ==========================================================================

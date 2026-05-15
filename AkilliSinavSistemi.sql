@@ -381,12 +381,41 @@ BEGIN
     DECLARE @BolumID INT;
     DECLARE @CakismaSayisi INT;
     DECLARE @GunlukSinavSayisi INT;
+    DECLARE @OturumSirasi INT;
+    DECLARE @ArtArdaCakisma INT = 0;
 
     SELECT @Yariyil = Yariyil, @DersTuru = DersTuru, @BolumID = BolumID
     FROM Dersler WHERE DersID = @DersID;
 
     IF @Yariyil IS NULL
     THROW 50007, 'HATA: Geçersiz DersID!', 1;
+
+    -- Ayný Bölüm Ve Döneme Ait Art Arda 2 Sýnav Koyma Engelleme 
+    -- Atanacak oturumun gün içindeki gerçek sýrasýný bul
+    SELECT @OturumSirasi = SiraNo
+    FROM (
+        SELECT OturumID, ROW_NUMBER() OVER (ORDER BY BaslangicSaat) AS SiraNo
+        FROM Oturumlar
+    ) t
+    WHERE OturumID = @OturumID;
+
+    -- Ayný Bölüm ve AYNI YARIYIL için bir önceki (SiraNo - 1) veya bir sonraki (SiraNo + 1) oturumda sýnav var mý?
+    SELECT @ArtArdaCakisma = COUNT(*)
+    FROM Sinavlar s
+    INNER JOIN Dersler d ON s.DersID = d.DersID
+    INNER JOIN (
+        SELECT OturumID, ROW_NUMBER() OVER (ORDER BY BaslangicSaat) AS SiraNo
+        FROM Oturumlar
+    ) o ON s.OturumID = o.OturumID
+    WHERE s.Tarih = @Tarih 
+      AND d.BolumID = @BolumID 
+      AND d.Yariyil = @Yariyil
+      AND (o.SiraNo = @OturumSirasi - 1 OR o.SiraNo = @OturumSirasi + 1);
+
+    IF @ArtArdaCakisma > 0
+    BEGIN
+        ;THROW 50009, 'KURAL HATASI: Öðrencilerin peþ peþe sýnava girmemesi için ayný bölüm ve yarýyýla ait ardýþýk oturumlara sýnav konulamaz!', 1;
+    END
 
     -- Sadece zorunlu dersler için yarýyýl/oturum çakýþma kontrolü
     IF @DersTuru = 'Zorunlu'
