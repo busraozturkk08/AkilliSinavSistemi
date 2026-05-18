@@ -99,8 +99,8 @@ CREATE TABLE Gozetmen_Atamalari (
 
 CREATE TABLE Donem_Ayarlari (
     AyarID INT PRIMARY KEY DEFAULT 1,
-    DonemBaslangicTarihi DATE NOT NULL, -- Ýsim güncellendi
-    DonemBitisTarihi DATE NOT NULL,     -- Ýsim güncellendi
+    DonemBaslangicTarihi DATE NOT NULL,
+    DonemBitisTarihi DATE NOT NULL,  
     CONSTRAINT CHK_TekSatir CHECK (AyarID = 1) 
 );
 GO
