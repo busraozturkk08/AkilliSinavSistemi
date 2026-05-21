@@ -38,7 +38,7 @@ CREATE TABLE Derslikler (
     Tip NVARCHAR(50),
     Aktif BIT DEFAULT 1,
     Kat INT,
-    CONSTRAINT CK_DerslikTip CHECK (Tip IN ('Amfi', 'Sinif', 'Lab'))
+    CONSTRAINT CK_DerslikTip CHECK (Tip IN ('Büyük', 'Orta', 'Küçük'))
 );
 
 -- Personel
@@ -689,87 +689,347 @@ INSERT INTO Bolumler (BolumAd) VALUES
 ('Elektrik Mühendisliði');
 
 -- Dersler Tablosu Veri Giriþi
-INSERT INTO Dersler (DersKodu, Ad, DersTuru, OgrenciSayisi, Yariyil, BolumID) 
-VALUES 
--- Yazýlým Mühendisliði (BolumID: 1)
-('YZM101', 'Algoritma ve Programlama', 'Zorunlu', 150, 1, 1),
-('YZM202', 'Veritabaný Yönetimi Sistemleri', 'Zorunlu', 120, 4, 1),
-('YZM203', 'Veri Yapýlarý', 'Zorunlu', 90, 3, 1),
-('YZM301', 'Yazýlým Sýnama', 'Seçmeli', 45, 6, 1),
-('YZM201', 'Nesne Yönelik Programlama', 'Zorunlu', 130, 3, 1),
+-- ÖNCE TEST DERSLERÝ 
+INSERT INTO Dersler (DersKodu, Ad, DersTuru, OgrenciSayisi, Yariyil, BolumID) VALUES 
+    -- Yazýlým Mühendisliði (DersID: 1 - 5)
+    ('YZM101', 'Algoritma ve Programlama', 'Zorunlu', 150, 1, 1),
+    ('YZM202', 'Veritabaný Yönetimi Sistemleri', 'Zorunlu', 120, 4, 1),
+    ('YZM203', 'Veri Yapýlarý', 'Zorunlu', 90, 3, 1),
+    ('YZM301', 'Yazýlým Sýnama', 'Seçmeli', 45, 6, 1),
+    ('YZM201', 'Nesne Yönelik Programlama', 'Zorunlu', 130, 3, 1),
+    
+    -- Mekatronik Mühendisliði (DersID: 6 - 10)
+    ('MEK101', 'Statik', 'Zorunlu', 135, 2, 2),
+    ('MEK201', 'Makine Teorisi', 'Zorunlu', 95, 4, 2),
+    ('MEK202', 'Termodinamik ve Isý Transferi', 'Zorunlu', 115, 4, 2),
+    ('MEK401', 'Robotik', 'Seçmeli', 40, 7, 2),
+    ('MEK301', 'Elektrik Makinalarý', 'Zorunlu', 105, 5, 2),
+    
+    -- Makine Mühendisliði (DersID: 11 - 15)
+    ('MAK201', 'Mukavemet', 'Zorunlu', 160, 3, 3),
+    ('MAK202', 'Dinamik', 'Zorunlu', 145, 3, 3),
+    ('MAK301', 'Üretim Yöntemleri', 'Zorunlu', 100, 5, 3),
+    ('MAK102', 'Ýstatistik', 'Seçmeli', 70, 2, 3),
+    ('MAK302', 'Isý Transferi', 'Zorunlu', 120, 6, 3),
+    
+    -- Enerji Sistemleri Mühendisliði (DersID: 16 - 20)
+    ('ENR101', 'Temel Elektronik', 'Zorunlu', 125, 1, 4),
+    ('ENR201', 'Statik', 'Zorunlu', 110, 3, 4),
+    ('ENR301', 'Rüzgar Enerjisi Teknolojileri', 'Seçmeli', 55, 5, 4),
+    ('ENR302', 'Isý Transferleri', 'Zorunlu', 130, 6, 4),
+    ('ENR202', 'Makine Elemanlarý', 'Zorunlu', 90, 4, 4),
+    
+    -- Elektrik Mühendisliði (DersID: 21 - 25)
+    ('ELK101', 'Elektronik', 'Zorunlu', 110, 2, 5),
+    ('ELK102', 'Elektrik Devreleri', 'Zorunlu', 140, 2, 5),
+    ('ELK201', 'Bilgisayar Destekli Çizim', 'Seçmeli', 30, 4, 5),
+    ('ELK301', 'Elektromanyetik Alan Teorisi', 'Zorunlu', 85, 5, 5),
+    ('ELK302', 'Sensör ve Algýlayýcýlar', 'Seçmeli', 50, 6, 5);
 
 
--- Mekatronik Mühendisliði (BolumID: 2)
-('MEK101', 'Statik', 'Zorunlu', 135, 2, 2),
-('MEK201', 'Makine Teorisi', 'Zorunlu', 95, 4, 2),
-('MEK202', 'Termodinamik ve Isý Transferi', 'Zorunlu', 115, 4, 2),
-('MEK401', 'Robotik', 'Seçmeli', 40, 7, 2),
-('MEK301', 'Elektrik Makinalarý', 'Zorunlu', 105, 5, 2),
+-- SONRA GERÇEK MÜFREDAT GÝRÝÞLERÝ 
+INSERT INTO Dersler (DersKodu, Ad, DersTuru, OgrenciSayisi, Yariyil, BolumID) VALUES 
+    -- Yazýlým Mühendisliði
+    ('YZM-FIZ1301', 'Fizik I', 'Zorunlu', 100, 1, 1),
+    ('YZM-MAT1301', 'Matematik I', 'Zorunlu', 100, 1, 1),
+    ('YZM-YDI1121', 'Yabancý Dil I', 'Zorunlu', 100, 1, 1),
+    ('YZM-TDL1111', 'Türk Dili I', 'Zorunlu', 100, 1, 1),
+    ('YZM-AIT1101', 'Atatürk Ýlkeleri ve Ýnkýlap Tarihi I', 'Zorunlu', 100, 1, 1),
+    ('YZM1107', 'Temel Bilgisayar Bilimleri', 'Zorunlu', 100, 1, 1),
+    ('YZM1111', 'Algoritma ve Programlama I', 'Zorunlu', 100, 1, 1),
+    ('YZM1113', 'Yazýlým Mühendisliðinde Kariyer Planlama', 'Zorunlu', 100, 1, 1),
+    ('YZM-ADS1202', 'Alan Dýþý Seçmeli Dersler', 'Seçmeli', 50, 2, 1),
+    ('YZM-FIZ1302', 'Fizik II', 'Zorunlu', 100, 2, 1),
+    ('YZM-MAT1302', 'Matematik II', 'Zorunlu', 100, 2, 1),
+    ('YZM-YDI1122', 'Yabancý Dil II', 'Zorunlu', 100, 2, 1),
+    ('YZM-TDL1112', 'Türk Dili II', 'Zorunlu', 100, 2, 1),
+    ('YZM-AIT1102', 'Atatürk Ýlkeleri ve Ýnkýlap Tarihi II', 'Zorunlu', 100, 2, 1),
+    ('YZM1108', 'Yazýlým Mühendisliðine Giriþ', 'Zorunlu', 100, 2, 1),
+    ('YZM1112', 'Algoritma ve Programlama II', 'Zorunlu', 100, 2, 1),
+    ('YZM-ADS2201', 'Alan Dýþý Seçmeli Ders', 'Seçmeli', 50, 3, 1),
+    ('YZM-CBU4403', 'Ýþ Saðlýðý ve Güvenliði I', 'Zorunlu', 100, 3, 1),
+    ('YZM2111', 'Ayrýk Yapýlar', 'Zorunlu', 100, 3, 1),
+    ('YZM2113', 'Mühendislik Matematiði', 'Zorunlu', 100, 3, 1),
+    ('YZM2123', 'Web Programlamaya Giriþ', 'Zorunlu', 100, 3, 1),
+    ('YZM2125', 'Nesneye Yönelik Programlama', 'Zorunlu', 100, 3, 1),
+    ('YZM2127', 'Yazýlým Gereksinim Analizi', 'Zorunlu', 100, 3, 1),
+    ('YZM2200', 'Teknik Seçmeli Ders', 'Seçmeli', 50, 4, 1),
+    ('YZM-CBU4404', 'Ýþ Saðlýðý ve Güvenliði II', 'Zorunlu', 100, 4, 1),
+    ('YZM2114', 'Olasýlýk ve Ýstatistik', 'Zorunlu', 100, 4, 1),
+    ('YZM2122', 'Yazýlým Yapýmý', 'Zorunlu', 100, 4, 1),
+    ('YZM2126', 'Veritabaný Sistemlerine Giriþ', 'Zorunlu', 100, 4, 1),
+    ('YZM2128', 'Veri Yapýlarý', 'Zorunlu', 100, 4, 1),
+    ('YZM2130', 'Yazýlým Mimarisi ve Tasarýmý', 'Zorunlu', 100, 4, 1),
+    ('YMS3201', 'Teknik Seçmeli Ders', 'Seçmeli', 50, 5, 1),
+    ('YZM3107', 'Veritabaný Yönetim Sistemleri', 'Zorunlu', 100, 5, 1),
+    ('YZM3109', 'Bilgisayar Aðlarý', 'Zorunlu', 100, 5, 1),
+    ('YZM3111', 'Yazýlým Sýnama', 'Zorunlu', 100, 5, 1),
+    ('YMS3202', 'Teknik Seçmeli Ders', 'Seçmeli', 50, 6, 1),
+    ('YZM3116', 'Ýþletim Sistemleri', 'Zorunlu', 100, 6, 1),
+    ('YZM3118', 'Algoritma Analizi ve Tasarýmý', 'Zorunlu', 100, 6, 1),
+    ('YZM3120', 'Yazýlým Projesi Yönetimi', 'Zorunlu', 100, 6, 1),
+    ('YZM3122', 'Profesyonel Yazýlým Geliþtirme I', 'Zorunlu', 100, 6, 1),
+    ('YZM4300', 'Teknik Seçmeli Ders', 'Seçmeli', 50, 7, 1),
+    ('YZM4105', 'Sosyal Sorumluluk', 'Zorunlu', 100, 7, 1),
+    ('YZM4109', 'Staj', 'Zorunlu', 100, 7, 1),
+    ('YZM4119', 'Profesyonel Yazýlým Geliþtirme II', 'Zorunlu', 100, 7, 1),
 
--- Makine Mühendisliði (BolumID: 3)
-('MAK201', 'Mukavemet', 'Zorunlu', 160, 3, 3),
-('MAK202', 'Dinamik', 'Zorunlu', 145, 3, 3),
-('MAK301', 'Üretim Yöntemleri', 'Zorunlu', 100, 5, 3),
-('MAK102', 'Ýstatistik', 'Seçmeli', 70, 2, 3),
-('MAK302', 'Isý Transferi', 'Zorunlu', 120, 6, 3),
+    -- Mekatronik Mühendisliði
+    ('MKT-FIZ1301', 'Fizik I', 'Zorunlu', 100, 1, 2),
+    ('MKT-MAT1301', 'Matematik I', 'Zorunlu', 100, 1, 2),
+    ('MKT-YDI1121', 'Yabancý Dil I', 'Zorunlu', 100, 1, 2),
+    ('MKT-TDL1111', 'Türk Dili I', 'Zorunlu', 100, 1, 2),
+    ('MKT-AIT1101', 'Atatürk Ýlkeleri ve Ýnkýlap Tarihi I', 'Zorunlu', 100, 1, 2),
+    ('MKT-KIM1311', 'Kimya', 'Zorunlu', 100, 1, 2),
+    ('MKT-YZM1107', 'Temel Bilgisayar Bilimleri', 'Zorunlu', 100, 1, 2),
+    ('MKT1105', 'Mekatronik Mühendisliðine Giriþ', 'Zorunlu', 100, 1, 2),
+    ('MKT-FIZ1302', 'Fizik II', 'Zorunlu', 100, 2, 2),
+    ('MKT-MAT1302', 'Matematik II', 'Zorunlu', 100, 2, 2),
+    ('MKT-YDI1122', 'Yabancý Dil II', 'Zorunlu', 100, 2, 2),
+    ('MKT-TDL1112', 'Türk Dili II', 'Zorunlu', 100, 2, 2),
+    ('MKT-AIT1102', 'Atatürk Ýlkeleri ve Ýnkýlap Tarihi II', 'Zorunlu', 100, 2, 2),
+    ('MKT-YZM1304', 'Bilgisayar Programlama', 'Zorunlu', 100, 2, 2),
+    ('MKT1110', 'Elektrik Devreleri-I', 'Zorunlu', 100, 2, 2),
+    ('MKT1108', 'Bilgisayar Destekli Teknik Resim', 'Zorunlu', 100, 2, 2),
+    ('MKT-MKS2201', 'Teknik Olmayan Seçmeli Dersler', 'Seçmeli', 50, 3, 2),
+    ('MKT2101', 'Mühendislik Matematiði -I', 'Zorunlu', 100, 3, 2),
+    ('MKT2103', 'Elektrik Devreleri -II', 'Zorunlu', 100, 3, 2),
+    ('MKT2105', 'Statik', 'Zorunlu', 100, 3, 2),
+    ('MKT2107', 'Dinamik', 'Zorunlu', 100, 3, 2),
+    ('MKT2109', 'Malzeme Bilimi', 'Zorunlu', 100, 3, 2),
+    ('MKT2121', 'Mantýk Devreleri', 'Zorunlu', 100, 3, 2),
+    ('MKT-MKS2202', 'Teknik Olmayan Seçmeli Dersler', 'Seçmeli', 50, 4, 2),
+    ('MKT2102', 'Mühendislik Matematiði -II', 'Zorunlu', 100, 4, 2),
+    ('MKT2104', 'Elektronik Devreler', 'Zorunlu', 100, 4, 2),
+    ('MKT2106', 'Mukavemet', 'Zorunlu', 100, 4, 2),
+    ('MKT2108', 'Makine Teorisi', 'Zorunlu', 100, 4, 2),
+    ('MKT2110', 'Makine Elemanlarý', 'Zorunlu', 100, 4, 2),
+    ('MKT2122', 'Elektrik Makinalarý', 'Zorunlu', 100, 4, 2),
+    ('MKT3101', 'Otomatik Kontrol -I', 'Zorunlu', 100, 5, 2),
+    ('MKT3103', 'Hidrolik ve Pnömatik Sistemleri', 'Zorunlu', 100, 5, 2),
+    ('MKT3105', 'Akýþkanlar Mekaniði', 'Zorunlu', 100, 5, 2),
+    ('MKT3107', 'Bilgisayar Destekli Tasarým', 'Zorunlu', 100, 5, 2),
+    ('MKT3109', 'Mikrokontrolörler', 'Zorunlu', 100, 5, 2),
+    ('MKT3111', 'Güç Elektroniði ve Sürücü Sistemleri', 'Zorunlu', 100, 5, 2),
+    ('MKT-CBU4403', 'Ýþ Saðlýðý ve Güvenliði I', 'Zorunlu', 100, 5, 2),
+    ('MKT3102', 'Otomatik Kontrol -II', 'Zorunlu', 100, 6, 2),
+    ('MKT3104', 'Algýlayýcýlar ve Aktüatörler', 'Zorunlu', 100, 6, 2),
+    ('MKT3106', 'Termodinamik ve Isý Transferi', 'Zorunlu', 100, 6, 2),
+    ('MKT3108', 'Bilgisayar Destekli Üretim', 'Zorunlu', 100, 6, 2),
+    ('MKT3110', 'Endüstriyel Otomasyon Sistemleri', 'Zorunlu', 100, 6, 2),
+    ('MKT3112', 'Robotik', 'Zorunlu', 100, 6, 2),
+    ('MKT-CBU4404', 'Ýþ Saðlýðý ve Güvenliði II', 'Zorunlu', 100, 6, 2),
+    ('MKT3120', 'Mekatronik Mühendisliði Projesi', 'Zorunlu', 100, 6, 2),
+    ('MTS4201', 'Teknik Seçmeli Dersler', 'Seçmeli', 50, 7, 2),
+    ('MKT4105', 'Sosyal Sorumluluk', 'Zorunlu', 100, 7, 2),
+    ('MKT4111', 'Mekatronik Mühendisliði Tasarýmý', 'Zorunlu', 100, 7, 2),
 
--- Enerji Sistemleri Mühendisliði (BolumID: 4)
-('ENR101', 'Temel Elektronik', 'Zorunlu', 125, 1, 4),
-('ENR201', 'Statik', 'Zorunlu', 110, 3, 4),
-('ENR301', 'Rüzgar Enerjisi Teknolojileri', 'Seçmeli', 55, 5, 4),
-('ENR302', 'Isý Transferleri', 'Zorunlu', 130, 6, 4),
-('ENR202', 'Makine Elemanlarý', 'Zorunlu', 90, 4, 4),
+    -- Makine Mühendisliði
+    ('MAK-FIZ1301', 'Fizik I', 'Zorunlu', 100, 1, 3),
+    ('MAK-MAT1301', 'Matematik I', 'Zorunlu', 100, 1, 3),
+    ('MAK-YDI1121', 'Yabancý Dil I', 'Zorunlu', 100, 1, 3),
+    ('MAK-TDL1111', 'Türk Dili I', 'Zorunlu', 100, 1, 3),
+    ('MAK-AIT1101', 'Atatürk Ýlkeleri ve Ýnkýlap Tarihi I', 'Zorunlu', 100, 1, 3),
+    ('MAK-KIM1301', 'Kimya', 'Zorunlu', 100, 1, 3),
+    ('MAK1101', 'Teknik Resim', 'Zorunlu', 100, 1, 3),
+    ('MAK1103', 'Makine Mühendisliðine Giriþ', 'Zorunlu', 100, 1, 3),
+    ('MAK-SSD1218', 'Teknik Olmayan Seçmeli Dersler', 'Seçmeli', 50, 2, 3),
+    ('MAK-FIZ1302', 'Fizik II', 'Zorunlu', 100, 2, 3),
+    ('MAK-MAT1302', 'Matematik II', 'Zorunlu', 100, 2, 3),
+    ('MAK-YDI1122', 'Yabancý Dil II', 'Zorunlu', 100, 2, 3),
+    ('MAK-TDL1112', 'Türk Dili II', 'Zorunlu', 100, 2, 3),
+    ('MAK1102', 'Bilgisayar Destekli Teknik Resim', 'Zorunlu', 100, 2, 3),
+    ('MAK1304', 'Bilgisayar Bilimi ve Programlama', 'Zorunlu', 100, 2, 3),
+    ('MAK1104', 'Statik', 'Zorunlu', 100, 2, 3),
+    ('MAK2101', 'Mühendislik Matematiði-I', 'Zorunlu', 100, 3, 3),
+    ('MAK2107', 'Akýþkanlar Mekaniði', 'Zorunlu', 100, 3, 3),
+    ('MAK2117', 'Termodinamik -I', 'Zorunlu', 100, 3, 3),
+    ('MAK2113', 'Dinamik', 'Zorunlu', 100, 3, 3),
+    ('MAK2119', 'Mukavemet I', 'Zorunlu', 100, 3, 3),
+    ('MAK2115', 'Malzeme Bilimi', 'Zorunlu', 100, 3, 3),
+    ('MAK2121', 'Mühendislikte Deneysel Metotlar I', 'Zorunlu', 100, 3, 3),
+    ('MAK-AIT1102', 'Atatürk Ýlkeleri ve Ýnkýlap Tarihi II', 'Zorunlu', 100, 4, 3),
+    ('MAK-CBU4403', 'Ýþ Saðlýðý ve Güvenliði I', 'Zorunlu', 100, 4, 3),
+    ('MAK2102', 'Mühendislik Matematiði-II', 'Zorunlu', 100, 4, 3),
+    ('MAK2106', 'Mühendislik Malzemeleri', 'Zorunlu', 100, 4, 3),
+    ('MAK2120', 'Termodinamik II', 'Zorunlu', 100, 4, 3),
+    ('MAK2114', 'Mühendislikte Deneysel Metodlar II', 'Zorunlu', 100, 4, 3),
+    ('MAK2116', 'Mukavemet II', 'Zorunlu', 100, 4, 3),
+    ('MAK2118', 'Ýstatistik', 'Zorunlu', 100, 4, 3),
+    ('MAK3201', 'Teknik Seçmeli Dersler', 'Seçmeli', 50, 5, 3),
+    ('MAK-CBU4404', 'Ýþ Saðlýðý ve Güvenliði II', 'Zorunlu', 100, 5, 3),
+    ('MAK3101', 'Makine Elemanlarý I', 'Zorunlu', 100, 5, 3),
+    ('MAK3107', 'Sistem Analizi ve Kontrol', 'Zorunlu', 100, 5, 3),
+    ('MAK3109', 'Bilgisayar Destekli Mühendislik', 'Zorunlu', 100, 5, 3),
+    ('MAK3111', 'Mekanizma Tekniði', 'Zorunlu', 100, 5, 3),
+    ('MAK3113', 'Üretim Yöntemleri I', 'Zorunlu', 100, 5, 3),
+    ('MAK3115', 'Kariyer Planlama', 'Zorunlu', 100, 5, 3),
+    ('MAK3102', 'Makine Elemanlarý II', 'Zorunlu', 100, 6, 3),
+    ('MAK3108', 'Elektronik ve Otomasyon Bilgisi', 'Zorunlu', 100, 6, 3),
+    ('MAK3116', 'Makine Dinamiði', 'Zorunlu', 100, 6, 3),
+    ('MAK3118', 'Mühendislik Ekonomisi ve Yönetimi', 'Zorunlu', 100, 6, 3),
+    ('MAK3114', 'Makine Mühendisliði Tasarýmý', 'Zorunlu', 100, 6, 3),
+    ('MAK3122', 'Üretim Yöntemleri II', 'Zorunlu', 100, 6, 3),
+    ('MAK3124', 'Isý Transferi', 'Zorunlu', 100, 6, 3),
+    ('MAK4201', 'Teknik Seçmeli Dersler', 'Seçmeli', 50, 7, 3),
+    ('MAK4105', 'Sosyal Sorumluluk', 'Zorunlu', 100, 7, 3),
+    ('MAK4115', 'Makine Mühendisliði Projesi', 'Zorunlu', 100, 7, 3),
 
--- Elektrik Mühendisliði (BolumID: 5) 
-('ELK101', 'Elektronik', 'Zorunlu', 110, 2, 5),
-('ELK102', 'Elektrik Devreleri', 'Zorunlu', 140, 2, 5),
-('ELK201', 'Bilgisayar Destekli Çizim', 'Seçmeli', 30, 4, 5),
-('ELK301', 'Elektromanyetik Alan Teorisi', 'Zorunlu', 85, 5, 5),
-('ELK302', 'Sensör ve Algýlayýcýlar', 'Seçmeli', 50, 6, 5);
+    -- Enerji Sistemleri Mühendisliði
+    ('ESM-FIZ1301', 'Fizik I', 'Zorunlu', 100, 1, 4),
+    ('ESM-MAT1301', 'Matematik I', 'Zorunlu', 100, 1, 4),
+    ('ESM-TDL1111', 'Türk Dili I', 'Zorunlu', 100, 1, 4),
+    ('ESM-AIT1101', 'Atatürk Ýlkeleri ve Ýnkýlap Tarihi I', 'Zorunlu', 100, 1, 4),
+    ('ESM-KIM1311', 'Kimya', 'Zorunlu', 100, 1, 4),
+    ('ESM-YDI1123', 'Yabancý Dil I', 'Zorunlu', 100, 1, 4),
+    ('ESM1105', 'Enerji Sistemleri Mühendisliðine Giriþ', 'Zorunlu', 100, 1, 4),
+    ('ESM1107', 'Temel Bilgisayar Bilimleri', 'Zorunlu', 100, 1, 4),
+    ('ESM1109', 'Kariyer Planlama', 'Zorunlu', 100, 1, 4),
+    ('ESM-FIZ1302', 'Fizik II', 'Zorunlu', 100, 2, 4),
+    ('ESM-MAT1302', 'Matematik II', 'Zorunlu', 100, 2, 4),
+    ('ESM-TDL1112', 'Türk Dili II', 'Zorunlu', 100, 2, 4),
+    ('ESM-AIT1102', 'Atatürk Ýlkeleri ve Ýnkýlap Tarihi II', 'Zorunlu', 100, 2, 4),
+    ('ESM1102', 'Bilgisayar Destekli Teknik Resim', 'Zorunlu', 100, 2, 4),
+    ('ESM1104', 'Sosyal Sorumluluk Projesi', 'Zorunlu', 100, 2, 4),
+    ('ESM-YDI1124', 'Yabancý Dil II', 'Zorunlu', 100, 2, 4),
+    ('ESM1108', 'Algoritma ve Programlamanýn Temelleri', 'Zorunlu', 100, 2, 4),
+    ('ESM1106', 'Elektrik Devreleri I', 'Zorunlu', 100, 2, 4),
+    ('ESM2201', 'Teknik Seçmeli Ders I', 'Seçmeli', 50, 3, 4),
+    ('ESM2105', 'Malzeme Bilimi', 'Zorunlu', 100, 3, 4),
+    ('ESM2107', 'Statik', 'Zorunlu', 100, 3, 4),
+    ('ESM2115', 'Mühendislik Matematiði', 'Zorunlu', 100, 3, 4),
+    ('ESM2117', 'Akýþkanlar Mekaniði I', 'Zorunlu', 100, 3, 4),
+    ('ESM2119', 'Termodinamik I', 'Zorunlu', 100, 3, 4),
+    ('ESM2121', 'Elektrik Devreleri II', 'Zorunlu', 100, 3, 4),
+    ('ESM2123', 'Temel Elektronik', 'Zorunlu', 100, 3, 4),
+    ('ESM-ADS2202', 'Alan Dýþý Seçmeli Ders', 'Seçmeli', 50, 4, 4),
+    ('ESM2202', 'Teknik Seçmeli Ders II', 'Seçmeli', 50, 4, 4),
+    ('ESM2114', 'Dinamik', 'Zorunlu', 100, 4, 4),
+    ('ESM2116', 'Endüstriyel Ölçme ve Kontrol', 'Zorunlu', 100, 4, 4),
+    ('ESM2118', 'Akýþkanlar Mekaniði II', 'Zorunlu', 100, 4, 4),
+    ('ESM2120', 'Termodinamik II', 'Zorunlu', 100, 4, 4),
+    ('ESM2122', 'Elektrik Makineleri', 'Zorunlu', 100, 4, 4),
+    ('ESM3207', 'Teknik Seçmeli Dersler III', 'Seçmeli', 50, 5, 4),
+    ('ESM-ADS3201', 'Alan Dýþý Seçmeli Dersler', 'Seçmeli', 50, 5, 4),
+    ('ESM-CBU4403', 'Ýþ Saðlýðý ve Güvenliði I', 'Zorunlu', 100, 5, 4),
+    ('ESM3109', 'Enerji Mühendisliði Laboratuvarý I', 'Zorunlu', 100, 5, 4),
+    ('ESM3111', 'Güç Elektroniði', 'Zorunlu', 100, 5, 4),
+    ('ESM3113', 'Isý Transferi I', 'Zorunlu', 100, 5, 4),
+    ('ESM3115', 'Enerji Ýletimi ve Daðýtýmý', 'Zorunlu', 100, 5, 4),
+    ('ESM3220', 'Teknik Seçmeli Ders IV', 'Seçmeli', 50, 6, 4),
+    ('ESM-CBU4404', 'Ýþ Saðlýðý ve Güvenliði II', 'Zorunlu', 100, 6, 4),
+    ('ESM3112', 'Mühendislik Tasarýmý', 'Zorunlu', 100, 6, 4),
+    ('ESM3118', 'Enerji Mühendisliði Laboratuvarý II', 'Zorunlu', 100, 6, 4),
+    ('ESM3114', 'Isý Transferi II', 'Zorunlu', 100, 6, 4),
+    ('ESM3116', 'Mühendislikte Bilgisayar Uygulamalarý', 'Zorunlu', 100, 6, 4),
+    ('ESM4237', 'Teknik Seçmeli Ders V', 'Seçmeli', 50, 7, 4),
+    ('ESM4273', 'Teknik Olmayan Ders I', 'Seçmeli', 50, 7, 4),
+    ('ESM4115', 'Mühendislik Projesi', 'Zorunlu', 100, 7, 4),
+    ('ESM4113', 'Enerji Verimliliði ve Yönetimi', 'Zorunlu', 100, 7, 4),
+
+    -- Elektrik Mühendisliði
+    ('ELK-FIZ1301', 'Fizik I', 'Zorunlu', 100, 1, 5),
+    ('ELK-MAT1301', 'Matematik I', 'Zorunlu', 100, 1, 5),
+    ('ELK-TDL1111', 'Türk Dili I', 'Zorunlu', 100, 1, 5),
+    ('ELK-AIT1101', 'Atatürk Ýlkeleri ve Ýnkýlap Tarihi I', 'Zorunlu', 100, 1, 5),
+    ('ELK-YDI1131', 'Yabancý Dil', 'Zorunlu', 100, 1, 5),
+    ('ELK1101', 'Lineer Cebir', 'Zorunlu', 100, 1, 5),
+    ('ELK1103', 'Kariyer Planlama', 'Zorunlu', 100, 1, 5),
+    ('ELK1105', 'Elektrik Mühendisliðine Giriþ', 'Zorunlu', 100, 1, 5),
+    ('ELK1107', 'Bilgisayar Destekli Çizim', 'Zorunlu', 100, 1, 5),
+    ('ELK-FIZ1302', 'Fizik II', 'Zorunlu', 100, 2, 5),
+    ('ELK-MAT1302', 'Matematik II', 'Zorunlu', 100, 2, 5),
+    ('ELK-TDL1112', 'Türk Dili II', 'Zorunlu', 100, 2, 5),
+    ('ELK-AIT1102', 'Atatürk Ýlkeleri ve Ýnkýlap Tarihi II', 'Zorunlu', 100, 2, 5),
+    ('ELK1102', 'Elektrik Devreleri I', 'Zorunlu', 100, 2, 5),
+    ('ELK1104', 'Bilgisayar Programlama', 'Zorunlu', 100, 2, 5),
+    ('ELK1106', 'Elektrik Ölçme Teknikleri', 'Zorunlu', 100, 2, 5),
+    ('ELK-ADS2201', 'Alan Dýþý Seçmeli Dersler', 'Seçmeli', 50, 3, 5),
+    ('ELK2201', 'Teknik Seçmeli Ders I', 'Seçmeli', 50, 3, 5),
+    ('ELK-CBU4403', 'Ýþ Saðlýðý ve Güvenliði I', 'Zorunlu', 100, 3, 5),
+    ('ELK2101', 'Elektrik Devreleri II', 'Zorunlu', 100, 3, 5),
+    ('ELK2103', 'Elektromanyetik Alan Teorisi', 'Zorunlu', 100, 3, 5),
+    ('ELK2105', 'Diferansiyel Denklemler', 'Zorunlu', 100, 3, 5),
+    ('ELK2107', 'Elektronik', 'Zorunlu', 100, 3, 5),
+    ('ELK-ADS2202', 'Alan Dýþý Seçmeli Ders', 'Seçmeli', 50, 4, 5),
+    ('ELK2202', 'Teknik Seçmeli Ders II', 'Seçmeli', 50, 4, 5),
+    ('ELK-CBU4404', 'Ýþ Saðlýðý ve Güvenliði II', 'Zorunlu', 100, 4, 5),
+    ('ELK2102', 'Sayýsal Elektronik', 'Zorunlu', 100, 4, 5),
+    ('ELK2104', 'Aydýnlatma Tekniði ve Tesis Projeleri', 'Zorunlu', 100, 4, 5),
+    ('ELK2106', 'Enerji Üretimi', 'Zorunlu', 100, 4, 5),
+    ('ELK2108', 'Kumanda Teknikleri', 'Zorunlu', 100, 4, 5),
+    ('ELK3201', 'Teknik Seçmeli Ders III', 'Seçmeli', 50, 5, 5),
+    ('ELK3101', 'Güç Elektroniði', 'Zorunlu', 100, 5, 5),
+    ('ELK3103', 'Elektrik Makineleri I', 'Zorunlu', 100, 5, 5),
+    ('ELK3105', 'Yüksek Gerilim Tekniði', 'Zorunlu', 100, 5, 5),
+    ('ELK3107', 'Enerji Ýletim Sistemleri', 'Zorunlu', 100, 5, 5),
+    ('ELK3109', 'Sinyaller ve Sistemler', 'Zorunlu', 100, 5, 5),
+    ('ELK3202', 'Teknik Seçmeli Ders IV', 'Seçmeli', 50, 6, 5),
+    ('ELK3102', 'Otomatik Kontrol', 'Zorunlu', 100, 6, 5),
+    ('ELK3104', 'Elektrik Makineleri II', 'Zorunlu', 100, 6, 5),
+    ('ELK3106', 'Enerji Daðýtýmý', 'Zorunlu', 100, 6, 5),
+    ('ELK3108', 'Elektrik Mühendisliði Projesi I', 'Zorunlu', 100, 6, 5),
+    ('ELK4201', 'Teknik Seçmeli Ders V', 'Seçmeli', 50, 7, 5),
+    ('ELK4101', 'Elektrik Mühendisliði Projesi II', 'Zorunlu', 100, 7, 5),
+    ('ELK4105', 'Sosyal Sorumluluk', 'Zorunlu', 100, 7, 5);
 
 -- Derslikler Verileri
 INSERT INTO Derslikler (Ad, Kapasite, Tip, Aktif, Kat) 
 VALUES 
-('Amfi-1', 100, 'Amfi', 1, 0),  
-('Amfi-2', 100, 'Amfi', 1, 0),  
-('Z-01', 40, 'Sinif', 1, 0),  
-('101', 60, 'Sinif', 1, 1), 
-('102', 60, 'Sinif', 1, 1), 
-('103', 50, 'Sinif', 1, 1),
-('201', 60, 'Sinif', 1, 2), 
-('202', 70, 'Sinif', 1, 2), 
-('Lab-1', 30, 'Lab', 1, 2),
-('Lab-2', 30, 'Lab', 1, 2);
+    -- Küçük Sýnýflar (Kapasite: 36)
+    ('205', 36, 'Küçük', 1, 2),  
+    ('206', 36, 'Küçük', 1, 2),  
+    ('207', 36, 'Küçük', 1, 2),  
+    ('208', 36, 'Küçük', 1, 2),  
+    ('305', 36, 'Küçük', 1, 3),  
+    ('306', 36, 'Küçük', 1, 3),  
+    ('307', 36, 'Küçük', 1, 3),  
+    ('308', 36, 'Küçük', 1, 3),  
 
---Personel (Gözetmen Havuzu) - Güncellenmiþ Yaygýn Ýsimler
-INSERT INTO Personel (Unvan, Ad, Soyad, BolumID) 
+    -- Orta Büyüklükteki Sýnýflar
+    ('309', 40, 'Orta', 1, 3),  
+    ('311', 50, 'Orta', 1, 3),
+
+    -- Büyük Sýnýflar (Kapasite: 60)
+    ('209', 60, 'Büyük', 1, 2),
+    ('210', 60, 'Büyük', 1, 2),
+    ('310', 60, 'Büyük', 1, 3),
+    ('409', 60, 'Büyük', 1, 4),
+    ('410', 60, 'Büyük', 1, 4);
+
+--Personel (Gözetmen Havuzu) 
+ INSERT INTO Personel (Unvan, Ad, Soyad, BolumID) 
 VALUES 
--- Yazýlým Mühendisliði (BolumID: 1)
-('Dr. Öðr. Üyesi', 'Ahmet', 'Yýlmaz', 1),
-('Arþ. Gör.', 'Canan', 'Kaya', 1),
+    -- Yazýlým Mühendisliði (BolumID: 1)
+    ('Arþ. Gör.', 'Süleyman', 'ÇETÝNER', 1),
+    ('Arþ. Gör.', 'Elif Nur', 'AYGÜN', 1),
+    ('Arþ. Gör.', 'Tuðba', 'ÇELÝKTEN', 1),
+    ('Arþ. Gör.', 'Güney', 'KAYA', 1),
 
--- Mekatronik Mühendisliði (BolumID: 2)
-('Doç. Dr.', 'Mustafa', 'Öztürk', 2),
-('Arþ. Gör.', 'Esra', 'Aydýn', 2),
+    -- Mekatronik Mühendisliði (BolumID: 2)
+    ('Arþ. Gör. Dr.', 'Seda', 'VATAN CAN', 2),
+    ('Arþ. Gör.', 'Kübra', 'TURAL', 2),
 
--- Makine Mühendisliði (BolumID: 3)
-('Prof. Dr.', 'Mehmet', 'Demir', 3),
-('Arþ. Gör.', 'Buse', 'Yýldýz', 3),
+    -- Makine Mühendisliði (BolumID: 3)
+    ('Arþ. Gör.', 'Ömer', 'ÝLHAN', 3),
+    ('Arþ. Gör.', 'Büþranur', 'KESER', 3),
 
--- Enerji Sistemleri Mühendisliði (BolumID: 4)
-('Dr. Öðr. Üyesi', 'Emre', 'Þahin', 4),
-('Arþ. Gör.', 'Zeynep', 'Çelik', 4),
+    -- Enerji Sistemleri Mühendisliði (BolumID: 4)
+    ('Arþ. Gör. Dr.', 'Elif Merve', 'BAHAR', 4),
+    ('Arþ. Gör.', 'Menal', 'ÝLHAN', 4),
+    ('Arþ. Gör. Dr.', 'Mert', 'ÖKTEN', 4),
 
--- Elektrik Mühendisliði (BolumID: 5)
-('Doç. Dr.', 'Merve', 'Arslan', 5),
-('Arþ. Gör.', 'Deniz', 'Erdoðan', 5);            
+    -- Elektrik Mühendisliði (BolumID: 5)
+    ('Dr. Öðr. Üyesi', 'Yýlmaz Seryar', 'ARIKUÞU', 5),
+    ('Dr. Öðr. Üyesi', 'Bayram Melih', 'YILMAZ', 5);           
 
 --OTURUMLAR (Sýnav Slotlarý)
 INSERT INTO Oturumlar (Tanim, BaslangicSaat, BitisSaat) VALUES 
-('Oturum 1', '09:00:00', '10:30:00'),
-('Oturum 2', '11:00:00', '12:30:00'),
-('Oturum 3', '13:30:00', '15:00:00'),
-('Oturum 4', '15:30:00', '17:00:00');
+('Sabah-1', '09:00:00', '10:00:00'),
+('Sabah-2', '10:30:00', '11:30:00'),
+('öðle', '12:00:00', '13:00:00'),
+('Öðleden Sonra-1', '13:45:00', '14:45:00'),
+('Öðleden Sonra-2', '15:15:00', '16:30:00');
 
 -- Sadece Mazeretli ve Ýzinli Durumlarýn Girilmesi (Gereksiz "Müsait" satýrlarý temizlendi)
 INSERT INTO Personel_Durum (PersonelID, Tarih, MazeretTuru, Uygun)
@@ -801,112 +1061,110 @@ GO
 -- ==========================================================================================
 
 -- 1 HAZÝRAN PAZARTESÝ
-EXEC SinavEkle @DersID = 1,  @Tarih = '2026-06-01', @OturumID = 1; -- YZM101
-EXEC SinavEkle @DersID = 16, @Tarih = '2026-06-01', @OturumID = 1; -- ENR101 
-EXEC SinavEkle @DersID = 11, @Tarih = '2026-06-01', @OturumID = 2; -- MAK201 
-EXEC SinavEkle @DersID = 21,  @Tarih = '2026-06-01', @OturumID = 2; -- ELK101 
-EXEC SinavEkle @DersID = 6, @Tarih = '2026-06-01', @OturumID = 3; -- MEK101 
+EXEC SinavEkle @DersID = 1,  @Tarih = '2026-06-01', @OturumID = 1;
+EXEC SinavEkle @DersID = 16, @Tarih = '2026-06-01', @OturumID = 1;
+EXEC SinavEkle @DersID = 11, @Tarih = '2026-06-01', @OturumID = 2;
+EXEC SinavEkle @DersID = 21, @Tarih = '2026-06-01', @OturumID = 2;
+EXEC SinavEkle @DersID = 6,  @Tarih = '2026-06-01', @OturumID = 3;
 
 -- 2 HAZÝRAN SALI
-EXEC SinavEkle @DersID = 2,  @Tarih = '2026-06-02', @OturumID = 1; -- YZM202
-EXEC SinavEkle @DersID = 22, @Tarih = '2026-06-02', @OturumID = 1; -- ELK102 
-EXEC SinavEkle @DersID = 12, @Tarih = '2026-06-02', @OturumID = 2; -- MAK202
-EXEC SinavEkle @DersID = 17, @Tarih = '2026-06-02', @OturumID = 2; -- ENR201 
-EXEC SinavEkle @DersID = 7,  @Tarih = '2026-06-02', @OturumID = 3; -- MEK201
+EXEC SinavEkle @DersID = 2,  @Tarih = '2026-06-02', @OturumID = 1;
+EXEC SinavEkle @DersID = 22, @Tarih = '2026-06-02', @OturumID = 1;
+EXEC SinavEkle @DersID = 12, @Tarih = '2026-06-02', @OturumID = 2;
+EXEC SinavEkle @DersID = 17, @Tarih = '2026-06-02', @OturumID = 2;
+EXEC SinavEkle @DersID = 7,  @Tarih = '2026-06-02', @OturumID = 3;
 
 -- 3 HAZÝRAN ÇARÞAMBA
-EXEC SinavEkle @DersID = 3,  @Tarih = '2026-06-03', @OturumID = 1; -- YZM203
-EXEC SinavEkle @DersID = 23, @Tarih = '2026-06-03', @OturumID = 1; -- ELK201
-EXEC SinavEkle @DersID = 13, @Tarih = '2026-06-03', @OturumID = 2; -- MAK301
-EXEC SinavEkle @DersID = 18, @Tarih = '2026-06-03', @OturumID = 2; -- ENR301
-EXEC SinavEkle @DersID = 8,  @Tarih = '2026-06-03', @OturumID = 3; -- MEK202
+EXEC SinavEkle @DersID = 3,  @Tarih = '2026-06-03', @OturumID = 1;
+EXEC SinavEkle @DersID = 23, @Tarih = '2026-06-03', @OturumID = 1;
+EXEC SinavEkle @DersID = 13, @Tarih = '2026-06-03', @OturumID = 2;
+EXEC SinavEkle @DersID = 18, @Tarih = '2026-06-03', @OturumID = 2;
+EXEC SinavEkle @DersID = 8,  @Tarih = '2026-06-03', @OturumID = 3;
 
 -- 4 HAZÝRAN PERÞEMBE
-EXEC SinavEkle @DersID = 5,  @Tarih = '2026-06-04', @OturumID = 1; -- YZM201
-EXEC SinavEkle @DersID = 24, @Tarih = '2026-06-04', @OturumID = 1; -- ELK301
-EXEC SinavEkle @DersID = 14, @Tarih = '2026-06-04', @OturumID = 2; -- MAK102
-EXEC SinavEkle @DersID = 19, @Tarih = '2026-06-04', @OturumID = 2; -- ENR302
-EXEC SinavEkle @DersID = 9,  @Tarih = '2026-06-04', @OturumID = 3; -- MEK401
+EXEC SinavEkle @DersID = 5,  @Tarih = '2026-06-04', @OturumID = 1;
+EXEC SinavEkle @DersID = 24, @Tarih = '2026-06-04', @OturumID = 1;
+EXEC SinavEkle @DersID = 14, @Tarih = '2026-06-04', @OturumID = 2;
+EXEC SinavEkle @DersID = 19, @Tarih = '2026-06-04', @OturumID = 2;
+EXEC SinavEkle @DersID = 9,  @Tarih = '2026-06-04', @OturumID = 3;
 
 -- 5 HAZÝRAN CUMA
-EXEC SinavEkle @DersID = 4,  @Tarih = '2026-06-05', @OturumID = 1; -- YZM301
-EXEC SinavEkle @DersID = 25, @Tarih = '2026-06-05', @OturumID = 1; -- ELK302
-EXEC SinavEkle @DersID = 15, @Tarih = '2026-06-05', @OturumID = 2; -- MAK302
-EXEC SinavEkle @DersID = 20, @Tarih = '2026-06-05', @OturumID = 2; -- ENR202
-EXEC SinavEkle @DersID = 10, @Tarih = '2026-06-05', @OturumID = 3; -- MEK301
-
+EXEC SinavEkle @DersID = 4,  @Tarih = '2026-06-05', @OturumID = 1;
+EXEC SinavEkle @DersID = 25, @Tarih = '2026-06-05', @OturumID = 1;
+EXEC SinavEkle @DersID = 15, @Tarih = '2026-06-05', @OturumID = 2;
+EXEC SinavEkle @DersID = 20, @Tarih = '2026-06-05', @OturumID = 2;
+EXEC SinavEkle @DersID = 10, @Tarih = '2026-06-05', @OturumID = 3;
 -- ==========================================================================================
 -- SALONLARIN SAKLI YORDAMLAR (SP) ÝLE KAYDEDÝLMESÝ
 -- ==========================================================================================
 
 -- 1 HAZÝRAN PAZARTESÝ
-EXEC SalonAta 1, 1; -- YZM101 -> Amfi-1
-EXEC SalonAta 1, 4; -- YZM101 -> 101
+EXEC SalonAta 1, 1; 
+EXEC SalonAta 1, 4;
 
-EXEC SalonAta 2, 2; -- ENR101 -> Amfi-2
-EXEC SalonAta 2, 3; -- ENR101 -> Z-01
+EXEC SalonAta 2, 2; 
+EXEC SalonAta 2, 3;
 
-EXEC SalonAta 3, 8; -- MAK201 -> 202
-EXEC SalonAta 3, 7; -- MAK201 -> 201
-EXEC SalonAta 3, 9; -- MAK201 -> Lab-1
+EXEC SalonAta 3, 8; 
+EXEC SalonAta 3, 7; 
+EXEC SalonAta 3, 9;
 
-EXEC SalonAta 4, 5; -- ELK101 -> 102
-EXEC SalonAta 4, 6; -- ELK101 -> 103
-
-EXEC SalonAta 5, 7; -- MEK101 -> 201
-EXEC SalonAta 5, 8; -- MEK101 -> 202
-EXEC SalonAta 5, 10;-- MEK101 -> Lab-2
+EXEC SalonAta 4, 5; 
+EXEC SalonAta 4, 6; 
+EXEC SalonAta 5, 7; 
+EXEC SalonAta 5, 8; 
+EXEC SalonAta 5, 10;
 
 -- 2 HAZÝRAN SALI
-EXEC SalonAta 6, 1; -- YZM202 -> Amfi-1
-EXEC SalonAta 6, 3; -- YZM202 -> Z-01
+EXEC SalonAta 6, 1; 
+EXEC SalonAta 6, 3; 
 
-EXEC SalonAta 7, 4; -- ELK102 -> 101
-EXEC SalonAta 7, 5; -- ELK102 -> 102
-EXEC SalonAta 7, 10;-- ELK102 -> Lab-2
+EXEC SalonAta 7, 4; 
+EXEC SalonAta 7, 5; 
+EXEC SalonAta 7, 10;
 
-EXEC SalonAta 8, 8; -- MAK202 -> 202
-EXEC SalonAta 8, 7; -- MAK202 -> 201
-EXEC SalonAta 8, 9; -- MAK202 -> Lab-1
+EXEC SalonAta 8, 8; 
+EXEC SalonAta 8, 7; 
+EXEC SalonAta 8, 9; 
 
-EXEC SalonAta 9, 3; -- ENR201 -> Z-01
-EXEC SalonAta 9, 2; -- ENR201 -> Amfi-2
+EXEC SalonAta 9, 3; 
+EXEC SalonAta 9, 2; 
 
-EXEC SalonAta 10, 6; -- MEK201 -> 103
-EXEC SalonAta 10, 5; -- MEK201 -> 102
+EXEC SalonAta 10, 6;
+EXEC SalonAta 10, 5; 
 
 -- 3 HAZÝRAN ÇARÞAMBA
-EXEC SalonAta 11, 7; -- YZM203 -> 201
-EXEC SalonAta 11, 8; -- YZM203 -> 202
-EXEC SalonAta 12, 9; -- ELK201 -> Lab-1
-EXEC SalonAta 13, 1; -- MAK301 -> Amfi-1
-EXEC SalonAta 14, 10;-- ENR301 -> Lab-2
-EXEC SalonAta 14, 9; -- ENR301 -> Lab-1
-EXEC SalonAta 15, 4; -- MEK202 -> 101
-EXEC SalonAta 15, 5; -- MEK202 -> 102
+EXEC SalonAta 11, 7;
+EXEC SalonAta 11, 8; 
+EXEC SalonAta 12, 9; 
+EXEC SalonAta 13, 1; 
+EXEC SalonAta 14, 10;
+EXEC SalonAta 14, 9; 
+EXEC SalonAta 15, 4; 
+EXEC SalonAta 15, 5; 
 
 -- 4 HAZÝRAN PERÞEMBE
-EXEC SalonAta 16, 1; -- YZM201 -> Amfi-1
-EXEC SalonAta 16, 2; -- YZM201 -> Amfi-2
-EXEC SalonAta 17, 8; -- ELK301 -> 202
-EXEC SalonAta 17, 7; -- ELK301 -> 201
-EXEC SalonAta 18, 6; -- MAK102 -> 103
-EXEC SalonAta 18, 5; -- MAK102 -> 102
-EXEC SalonAta 19, 3; -- ENR302 -> Z-01
-EXEC SalonAta 19, 9; -- ENR302 -> Lab-1
-EXEC SalonAta 19, 1; -- ENR302 -> Amfi-1
-EXEC SalonAta 20, 10;-- MEK401 -> Lab-2
-EXEC SalonAta 20, 6; -- MEK401 -> 103
+EXEC SalonAta 16, 1; 
+EXEC SalonAta 16, 2; 
+EXEC SalonAta 17, 8;
+EXEC SalonAta 17, 7; 
+EXEC SalonAta 18, 6; 
+EXEC SalonAta 18, 5;
+EXEC SalonAta 19, 3;
+EXEC SalonAta 19, 9;
+EXEC SalonAta 19, 1; 
+EXEC SalonAta 20, 10;
+EXEC SalonAta 20, 6; 
 
 -- 5 HAZÝRAN CUMA
-EXEC SalonAta 21, 5; -- YZM301 -> 102
-EXEC SalonAta 22, 6; -- ELK302 -> 103
-EXEC SalonAta 23, 1; -- MAK302 -> Amfi-1
-EXEC SalonAta 23, 2; -- MAK302 -> Amfi-2
-EXEC SalonAta 24, 8; -- ENR202 -> 202
-EXEC SalonAta 24, 7; -- ENR202 -> 201
-EXEC SalonAta 25, 4; -- MEK301 -> 101
-EXEC SalonAta 25, 5; -- MEK301 -> 102
+EXEC SalonAta 21, 5; 
+EXEC SalonAta 22, 6; 
+EXEC SalonAta 23, 1; 
+EXEC SalonAta 23, 2; 
+EXEC SalonAta 24, 8; 
+EXEC SalonAta 24, 7; 
+EXEC SalonAta 25, 4;
+EXEC SalonAta 25, 5;
 GO
 
 -- ==========================================================================================
@@ -914,67 +1172,62 @@ GO
 -- ==========================================================================================
 
 -- 1 HAZÝRAN PAZARTESÝ
--- YZM101 (AtamaID: 1, 2) | ENR101 (AtamaID: 3, 4) | MAK201 (AtamaID: 5, 6, 7) | ELK101 (AtamaID: 8, 9) | MEK101 (AtamaID: 10, 11, 12)
-EXEC GozetmenAta 1, 2;   -- Canan Kaya (Yazýlým) [Ahmet Yýlmaz mazeretli]
-EXEC GozetmenAta 2, 9;   -- Merve Arslan (Havuz-Elektrik)
-EXEC GozetmenAta 3, 7;   -- Emre Þahin (Enerji)
-EXEC GozetmenAta 4, 8;   -- Zeynep Çelik (Enerji)
-EXEC GozetmenAta 5, 5;   -- Mehmet Demir (Makine) [Buse Yýldýz mazeretli]
-EXEC GozetmenAta 6, 4;   -- Esra Aydýn (Havuz-Mekatronik)
-EXEC GozetmenAta 7, 10;  -- Deniz Erdoðan (Havuz-Elektrik)
-EXEC GozetmenAta 8, 9;   -- Merve Arslan (Elektrik)
-EXEC GozetmenAta 9, 3;   -- Mustafa Öztürk (Mekatronik)
-EXEC GozetmenAta 10, 4;  -- Esra Aydýn (Mekatronik)
-EXEC GozetmenAta 11, 7;  -- Emre Þahin (Havuz-Enerji)
-EXEC GozetmenAta 12, 5;  -- Mehmet Demir (Havuz-Makine)
+EXEC GozetmenAta 1, 2;
+EXEC GozetmenAta 2, 9;
+EXEC GozetmenAta 3, 7;
+EXEC GozetmenAta 4, 8;
+EXEC GozetmenAta 5, 5;
+EXEC GozetmenAta 6, 4;
+EXEC GozetmenAta 7, 10;
+EXEC GozetmenAta 8, 9;
+EXEC GozetmenAta 9, 3;
+EXEC GozetmenAta 10, 4;
+EXEC GozetmenAta 11, 7;
+EXEC GozetmenAta 12, 5;
 
 -- 2 HAZÝRAN SALI
--- YZM202 (13, 14) | ELK102 (15, 16, 17) | MAK202 (18, 19, 20) | ENR201 (21, 22) | MEK201 (23, 24)
-EXEC GozetmenAta 13, 1;  -- Ahmet Yýlmaz (Yazýlým)
-EXEC GozetmenAta 14, 2;  -- Canan Kaya (Yazýlým)
-EXEC GozetmenAta 15, 9;  -- Merve Arslan (Elektrik)
-EXEC GozetmenAta 16, 5;  -- Mehmet Demir (Havuz-Makine)
-EXEC GozetmenAta 17, 6;  -- Buse Yýldýz (Havuz-Makine)
-EXEC GozetmenAta 18, 5;  -- Mehmet Demir (Makine)
-EXEC GozetmenAta 19, 6;  -- Buse Yýldýz (Makine)
-EXEC GozetmenAta 20, 1;  -- Ahmet Yýlmaz (Havuz-Yazýlým)
-EXEC GozetmenAta 21, 7;  -- Emre Þahin (Enerji)
-EXEC GozetmenAta 22, 8;  -- Zeynep Çelik (Enerji)
-EXEC GozetmenAta 23, 4;  -- Esra Aydýn (Mekatronik) [Mustafa Öztürk mazeretli]
-EXEC GozetmenAta 24, 2;  -- Canan Kaya (Havuz-Yazýlým)
+EXEC GozetmenAta 13, 1;
+EXEC GozetmenAta 14, 2;
+EXEC GozetmenAta 15, 9;
+EXEC GozetmenAta 16, 5;
+EXEC GozetmenAta 17, 6;
+EXEC GozetmenAta 18, 5;
+EXEC GozetmenAta 19, 6;
+EXEC GozetmenAta 20, 1;
+EXEC GozetmenAta 21, 7;
+EXEC GozetmenAta 22, 8;
+EXEC GozetmenAta 23, 4;
+EXEC GozetmenAta 24, 2;
 
 -- 3 HAZÝRAN ÇARÞAMBA
--- YZM203 (25, 26) | ELK201 (27) | MAK301 (28) | ENR301 (29, 30) | MEK202 (31, 32)
-EXEC GozetmenAta 25, 1;  -- Ahmet Yýlmaz (Yazýlým) [Canan Kaya mazeretli]
-EXEC GozetmenAta 26, 3;  -- Mustafa Öztürk (Havuz-Mekatronik)
-EXEC GozetmenAta 27, 9;  -- Merve Arslan (Elektrik)
-EXEC GozetmenAta 28, 5;  -- Mehmet Demir (Makine)
-EXEC GozetmenAta 29, 7;  -- Emre Þahin (Enerji)
-EXEC GozetmenAta 30, 8;  -- Zeynep Çelik (Enerji)
-EXEC GozetmenAta 31, 3;  -- Mustafa Öztürk (Mekatronik)
-EXEC GozetmenAta 32, 10; -- Deniz Erdoðan (Havuz-Elektrik)
+EXEC GozetmenAta 25, 1;
+EXEC GozetmenAta 26, 3;
+EXEC GozetmenAta 27, 9;
+EXEC GozetmenAta 28, 5;
+EXEC GozetmenAta 29, 7;
+EXEC GozetmenAta 30, 8;
+EXEC GozetmenAta 31, 3;
+EXEC GozetmenAta 32, 10;
 
 -- 4 HAZÝRAN PERÞEMBE
--- YZM201 (33, 34) | ELK301 (35, 36) | MAK102 (37, 38) | ENR302 (39, 40, 41) | MEK401 (42, 43)
-EXEC GozetmenAta 33, 1;  -- Ahmet Yýlmaz (Yazýlým)
-EXEC GozetmenAta 34, 2;  -- Canan Kaya (Yazýlým)
-EXEC GozetmenAta 35, 9;  -- Merve Arslan (Elektrik)
-EXEC GozetmenAta 36, 10; -- Deniz Erdoðan (Elektrik)
-EXEC GozetmenAta 37, 5;  -- Mehmet Demir (Makine)
-EXEC GozetmenAta 38, 6;  -- Buse Yýldýz (Makine)
-EXEC GozetmenAta 39, 7;  -- Emre Þahin (Enerji) [Zeynep Çelik mazeretli]
-EXEC GozetmenAta 40, 3;  -- Mustafa Öztürk (Havuz-Mekatronik)
-EXEC GozetmenAta 41, 4;  -- Esra Aydýn (Havuz-Mekatronik)
-EXEC GozetmenAta 42, 4;  -- Esra Aydýn (Mekatronik)
-EXEC GozetmenAta 43, 2;  -- Canan Kaya (Havuz-Yazýlým)
+EXEC GozetmenAta 33, 1;
+EXEC GozetmenAta 34, 2;
+EXEC GozetmenAta 35, 9;
+EXEC GozetmenAta 36, 10;
+EXEC GozetmenAta 37, 5;
+EXEC GozetmenAta 38, 6;
+EXEC GozetmenAta 39, 7;
+EXEC GozetmenAta 40, 3;
+EXEC GozetmenAta 41, 4;
+EXEC GozetmenAta 42, 4;
+EXEC GozetmenAta 43, 2;
 
 -- 5 HAZÝRAN CUMA
--- YZM301 (44) | ELK302 (45) | MAK302 (46, 47) | ENR202 (48, 49) | MEK301 (50, 51)
-EXEC GozetmenAta 44, 1;  -- Ahmet Yýlmaz (Yazýlým)
-EXEC GozetmenAta 45, 10; -- Deniz Erdoðan (Elektrik) [Merve Arslan mazeretli]
-EXEC GozetmenAta 46, 5;  -- Mehmet Demir (Makine)
-EXEC GozetmenAta 47, 6;  -- Buse Yýldýz (Makine)
-EXEC GozetmenAta 48, 7;  -- Emre Þahin (Enerji)
-EXEC GozetmenAta 49, 8;  -- Zeynep Çelik (Enerji)
-EXEC GozetmenAta 50, 3;  -- Mustafa Öztürk (Mekatronik)
-EXEC GozetmenAta 51, 4;  -- Esra Aydýn (Mekatronik)
+EXEC GozetmenAta 44, 1;
+EXEC GozetmenAta 45, 10;
+EXEC GozetmenAta 46, 5;
+EXEC GozetmenAta 47, 6;
+EXEC GozetmenAta 48, 7;
+EXEC GozetmenAta 49, 8;
+EXEC GozetmenAta 50, 3;
+EXEC GozetmenAta 51, 4;
