@@ -297,7 +297,21 @@ app.post('/api/akilli-atama', async (req, res) => {
     try {
         const pool = await poolPromise;
         
-        // 1. ADIM: Sınavı Oluştur
+        // --- KRİTİK EKLEME: Tarih Aralığı Kontrolü ---
+        const donemKontrol = await pool.request().query('SELECT DonemBaslangicTarihi, DonemBitisTarihi FROM Donem_Ayarlari WHERE AyarID = 1');
+        const baslangic = new Date(donemKontrol.recordset[0].DonemBaslangicTarihi);
+        const bitis = new Date(donemKontrol.recordset[0].DonemBitisTarihi);
+        const sinavTarihi = new Date(Tarih);
+
+        if (sinavTarihi < baslangic || sinavTarihi > bitis) {
+            return res.status(400).json({ 
+                hata: `Sınav tarihi (${Tarih}) belirlenen dönem aralığı (${baslangic.toLocaleDateString()} - ${bitis.toLocaleDateString()}) dışındadır!` 
+            });
+        }
+        // --------------------------------------------
+
+        // 1. ADIM: Sınavı Oluştur (SQL'deki SinavEkle prosedürünü çağırır)
+        // SQL prosedürün zaten "Tarih kontrolü" yapıyor, hata gelirse direk "catch" bloğuna düşer.
         await pool.request()
             .input('DersID', sql.Int, DersID)
             .input('Tarih', sql.Date, Tarih)
@@ -314,32 +328,29 @@ app.post('/api/akilli-atama', async (req, res) => {
         if (sinavResult.recordset.length > 0) {
             const sinavID = sinavResult.recordset[0].SinavID;
 
-            // 3. ADIM: Kapasiteye Göre Salonları Ata
+            // 3. ADIM: Salon Ata
             await pool.request()
                 .input('SinavID', sql.Int, sinavID)
                 .execute('SalonAta');
 
-            // 4. ADIM: Atanan Salonların ID'lerini (AtamaID) Çek
+            // 4. ADIM: Gözetmen Ata
             const salonResult = await pool.request()
                 .input('SinavID', sql.Int, sinavID)
                 .query('SELECT AtamaID FROM Sinav_Salonlari WHERE SinavID = @SinavID');
 
             const atamaListesi = salonResult.recordset;
-
-            // 5. ADIM: Her Bir Salon İçin Otomatik Gözetmen Ata
             for (let i = 0; i < atamaListesi.length; i++) {
                 await pool.request()
                     .input('SinavSalonID', sql.Int, atamaListesi[i].AtamaID)
-                    // PersonelID göndermiyoruz, SP içindeki SQL havuzdan kendi seçecek
                     .execute('GozetmenAta'); 
             }
 
-            res.json({ mesaj: "Sınav başarıyla oluşturuldu; salonlar ve gözetmenler kurallara uygun olarak otomatik atandı." });
-        } else {
-            res.status(400).json({ hata: "Sınav ID'si alınamadı." });
+            res.json({ mesaj: "Otomatik planlama başarıyla tamamlandı." });
         }
     } catch (err) { 
-        res.status(400).json({ hata: err.message }); 
+        // SQL'den gelen THROW hataları buraya düşer.
+        // Mesela "50008 - Dönem dışı tarih" hatası burada yakalanır.
+        res.status(400).json({ hata: "Sınav Planlanamadı: " + err.message }); 
     }
 });
 
