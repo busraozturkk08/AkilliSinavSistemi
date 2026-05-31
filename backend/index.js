@@ -10,13 +10,20 @@ app.use(cors());
 // 1. ARAYÜZ (FRONTEND) İÇİN GET ENDPOINT'LERİ
 // ==========================================
 
-// Akıllı Planlama: Dersleri Listele
+// Akıllı Planlama: Dersleri ve Bölüm İsimlerini Listele
 app.get('/api/SinavYonetim', async (req, res) => {
     try {
         const pool = await poolPromise;
         const result = await pool.request().query(`
-            SELECT DersID as dersId, DersKodu as dersKodu, Ad as ad, OgrenciSayisi as ogrenciSayisi, Yariyil as yariyil 
-            FROM Dersler
+            SELECT 
+                d.DersID as dersId, 
+                d.DersKodu as dersKodu, 
+                d.Ad as ad, 
+                d.OgrenciSayisi as ogrenciSayisi, 
+                d.Yariyil as yariyil,
+                REPLACE(b.BolumAd, ' Bölüm', '') as bolumId  -- "Bölüm" kelimesini temizler
+            FROM Dersler d
+            INNER JOIN Bolumler b ON d.BolumID = b.BolumID
         `);
         res.json(result.recordset);
     } catch (err) {
@@ -24,12 +31,17 @@ app.get('/api/SinavYonetim', async (req, res) => {
     }
 });
 
-// Akıllı Planlama: Aktif Derslikleri Listele (Kapasiteye göre büyükten küçüğe)
+// Akıllı Planlama: Aktif Derslikleri Listele (Kısıtlama ve Tip Bilgisi Dahil)
 app.get('/api/DerslikYonetim', async (req, res) => {
     try {
         const pool = await poolPromise;
         const result = await pool.request().query(`
-            SELECT DerslikID as derslikId, Ad as ad, Kapasite as kapasite, Kat as kat 
+            SELECT 
+                DerslikID as derslikId, 
+                Ad as ad, 
+                Kapasite as kapasite, 
+                Kat as kat,
+                Tip as tip -- KRİTİK EKLEME: Arkadaşının listeyi basabilmesi için bu alan şart!
             FROM Derslikler 
             WHERE Aktif = 1 
             ORDER BY Kapasite DESC
@@ -40,13 +52,19 @@ app.get('/api/DerslikYonetim', async (req, res) => {
     }
 });
 
-// Mazeret Ekranı: Hocaları Listele
+// Mazeret Ekranı: Hocaları ve Bölüm İsimlerini Listele
 app.get('/api/PersonelYonetim', async (req, res) => {
     try {
         const pool = await poolPromise;
         const result = await pool.request().query(`
-            SELECT PersonelID as personelId, Unvan as unvan, Ad as ad, Soyad as soyad, BolumID as bolumId 
-            FROM Personel
+            SELECT 
+                p.PersonelID as personelId, 
+                p.Unvan as unvan, 
+                p.Ad as ad, 
+                p.Soyad as soyad, 
+                REPLACE(b.BolumAd, ' Bölüm', '') as bolumId  -- "Bölüm" kelimesini temizler
+            FROM Personel p
+            INNER JOIN Bolumler b ON p.BolumID = b.BolumID
         `);
         res.json(result.recordset);
     } catch (err) {
@@ -94,16 +112,17 @@ app.post('/api/SinavYonetim', async (req, res) => {
     }
 });
 
-// Tanımlamalar Ekranı: YENİ DERSLİK KAYDETME
+// Tanımlamalar Ekranı: YENİ DERSLİK KAYDETME 
 app.post('/api/DerslikYonetim', async (req, res) => {
-    const { ad, kapasite, kat } = req.body;
+    const { ad, kapasite, kat, tip } = req.body; // Frontend'den tip bilgisini de alalım
     try {
         const pool = await poolPromise;
         await pool.request()
             .input('Ad', sql.NVarChar, ad)
             .input('Kapasite', sql.Int, kapasite || 0)
             .input('Kat', sql.Int, kat || 0)
-            .query("INSERT INTO Derslikler (Ad, Kapasite, Tip, Aktif, Kat) VALUES (@Ad, @Kapasite, 'Sinif', 1, @Kat)");
+            .input('Tip', sql.NVarChar, tip || 'Orta') // Eğer frontend tip göndermezse varsayılan 'Orta' olsun
+            .query("INSERT INTO Derslikler (Ad, Kapasite, Tip, Aktif, Kat) VALUES (@Ad, @Kapasite, @Tip, 1, @Kat)");
         res.status(201).json({ mesaj: "Derslik başarıyla eklendi." });
     } catch (err) { res.status(500).json({ hata: "Hata: " + err.message }); }
 });
@@ -208,7 +227,7 @@ app.put('/api/SinavYonetim/:id', async (req, res) => {
 });
 
 app.put('/api/DerslikYonetim/:id', async (req, res) => {
-    const { ad, kapasite, kat } = req.body;
+    const { ad, kapasite, kat, tip } = req.body;
     try {
         const pool = await poolPromise;
         await pool.request()
@@ -216,7 +235,8 @@ app.put('/api/DerslikYonetim/:id', async (req, res) => {
             .input('Ad', sql.NVarChar, ad)
             .input('Kapasite', sql.Int, kapasite)
             .input('Kat', sql.Int, kat)
-            .query("UPDATE Derslikler SET Ad=@Ad, Kapasite=@Kapasite, Kat=@Kat WHERE DerslikID=@ID");
+            .input('Tip', sql.NVarChar, tip || 'Orta') // Kısıtlamaya uygun Tip gönderimi
+            .query("UPDATE Derslikler SET Ad=@Ad, Kapasite=@Kapasite, Kat=@Kat, Tip=@Tip WHERE DerslikID=@ID");
         res.json({ mesaj: "Güncellendi" });
     } catch (err) { res.status(500).json({ hata: err.message }); }
 });
