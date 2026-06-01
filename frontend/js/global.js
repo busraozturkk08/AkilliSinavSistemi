@@ -1,5 +1,5 @@
 // --- ORTAK AYARLAR & STATE ---
-const BASE_URL = "https://prong-unsterile-flashy.ngrok-free.dev"; 
+const BASE_URL = "http://localhost:3000";
 
 let sistemVerileri = {
     derslikler: [], 

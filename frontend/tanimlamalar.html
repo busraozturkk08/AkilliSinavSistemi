@@ -6,20 +6,27 @@
     <title>SınavAsistan | Tanımlamalar</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .sidebar-gradient { background: linear-gradient(180deg, #4c1d95 0%, #1e1b4b 100%); }
+        .nav-btn-active { background: rgba(255, 255, 255, 0.15); border-left: 4px solid #a78bfa; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fadeIn { animation: fadeIn 0.3s ease-out forwards; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
 </head>
-<body class="bg-slate-50 text-slate-800">
+<body class="bg-slate-50 text-slate-800 font-sans">
     <div class="flex min-h-screen">
+        
         <aside class="w-72 sidebar-gradient text-white p-6 shadow-2xl flex flex-col sticky top-0 h-screen">
             <div class="flex items-center gap-3 mb-10 px-2">
-                <div class="bg-violet-400 p-2 rounded-xl">
-                    <i data-lucide="shield-check" class="text-white"></i>
-                </div>
+                <div class="bg-violet-400 p-2 rounded-xl"><i data-lucide="shield-check" class="text-white"></i></div>
                 <h1 class="text-xl font-bold tracking-tight">SınavAsistan</h1>
             </div>
             <nav class="space-y-2 flex-1">
-                <a href="tanimlamalar.html" class="nav-btn-active flex items-center gap-3 px-4 py-3 rounded-xl transition">
-                    <i data-lucide="settings" class="w-5 h-5"></i><span>Tanımlamalar</span>
+                <a href="tanimlamalar.html" class="nav-btn-active flex items-center gap-3 px-4 py-3 rounded-xl transition shadow-inner">
+                    <i data-lucide="settings" class="w-5 h-5 text-violet-300"></i><span>Tanımlamalar</span>
                 </a>
                 <a href="mazeret.html" class="flex items-center gap-3 px-4 py-3 rounded-xl transition hover:bg-white/5 text-violet-200">
                     <i data-lucide="user-x" class="w-5 h-5"></i><span>Hoca Mazeret</span>
@@ -38,47 +45,126 @@
 
         <main class="flex-1 p-10 overflow-y-auto animate-fadeIn">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
                 <div class="lg:col-span-2 space-y-8">
-                    <header class="mb-8">
-                        <h2 class="text-3xl font-extrabold text-slate-800">Sistem Tanımlamaları</h2>
-                        <p class="text-slate-500">Mekan, Personel ve Ders verilerini yönetin.</p>
+                    <header class="flex justify-between items-end">
+                        <div>
+                            <h2 class="text-3xl font-extrabold text-slate-800">Sistem Tanımlamaları</h2>
+                            <p class="text-slate-500 italic">Mekan, Personel ve Ders verilerini yönetin.</p>
+                        </div>
                     </header>
-                    <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
-                        <form id="definitionForm" class="space-y-4" onsubmit="handleRegistration(event)">
+
+                    <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 transition-all" id="formContainer">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 id="formTitle" class="text-xl font-bold text-slate-700">Yeni Kayıt Oluştur</h3>
+                            <button id="cancelEditBtn" onclick="resetForm()" class="hidden text-sm text-red-500 font-bold hover:underline">Düzenlemeyi İptal Et</button>
+                        </div>
+
+                        <form id="definitionForm" class="space-y-6" onsubmit="handleRegistration(event)">
+                            <input type="hidden" id="recordId" value="">
+
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div class="space-y-2">
-                                    <label for="regType" class="text-sm font-semibold text-slate-700">Kayıt Türü</label>
-                                    <select id="regType" class="w-full p-3 bg-slate-50 border rounded-xl outline-none">
+                                    <label class="text-sm font-bold text-slate-700">Kayıt Türü</label>
+                                    <select id="regType" onchange="toggleFields()" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 transition-shadow text-slate-700 font-medium cursor-pointer">
+                                        <option value="ders">Ders Bilgisi</option>
                                         <option value="derslik">Derslik (Mekan)</option>
                                         <option value="personel">Personel (Hoca)</option>
-                                        <option value="ders">Ders Bilgisi</option>
+                                        <option value="oturum">Oturum (Slot)</option>
                                     </select>
                                 </div>
                                 <div class="space-y-2">
-                                    <label for="regTitle" class="text-sm font-semibold text-slate-700">Ad / Tanım</label>
-                                    <input type="text" id="regTitle" class="w-full p-3 bg-slate-50 border rounded-xl outline-none">
+                                    <label id="labelTitle" class="text-sm font-bold text-slate-700">Ad / Tanım</label>
+                                    <input type="text" id="regTitle" placeholder="..." required class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 transition-shadow">
                                 </div>
                             </div>
-                            <div class="space-y-2">
-                                <label for="regValue" class="text-sm font-semibold text-slate-700">Kapasite / Bölüm</label>
-                                <input type="text" id="regValue" class="w-full p-3 bg-slate-50 border rounded-xl outline-none">
+
+                            <div id="courseFields" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="space-y-2">
+        <label class="text-sm font-bold text-slate-700">Ders Kodu</label>
+        <input type="text" id="regCode" placeholder="Örn: YZM 2126" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 transition-shadow">
+    </div>
+    <div class="space-y-2">
+        <label class="text-sm font-bold text-slate-700">Yarıyıl</label>
+        <input type="number" id="regSemester" placeholder="1-8" min="1" max="8" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 transition-shadow">
+    </div>
+    <div class="space-y-2">
+        <label class="text-sm font-bold text-slate-700">Ders Türü</label>
+        <select id="regCourseType" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 transition-shadow text-slate-700 font-medium cursor-pointer">
+            <option value="Zorunlu">Zorunlu</option>
+            <option value="Seçmeli">Seçmeli</option>
+        </select>
+    </div>
+</div>
+
+                            <div id="timeFields" class="grid grid-cols-1 md:grid-cols-2 gap-4 hidden">
+                                <div class="space-y-2">
+                                    <label class="text-sm font-bold text-slate-700">Başlangıç Saati</label>
+                                    <input type="time" id="startTime" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 transition-shadow">
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="text-sm font-bold text-slate-700">Bitiş Saati</label>
+                                    <input type="time" id="endTime" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 transition-shadow">
+                                </div>
                             </div>
-                            <button type="submit" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold hover:bg-indigo-700 shadow-lg">Sisteme Kaydet</button>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div id="valueField" class="space-y-2">
+                                    <label id="labelValue" class="text-sm font-bold text-slate-700">Kapasite / Bölüm ID</label>
+                                    <input type="text" id="regValue" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 transition-shadow">
+                                </div>
+                                
+                                <div id="floorField" class="space-y-2 hidden">
+                                    <label class="text-sm font-bold text-slate-700">Bulunduğu Kat</label>
+                                    <input type="number" id="regFloor" placeholder="0, 1, 2..." class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 transition-shadow">
+                                </div>
+                            </div>
+
+                            <button type="submit" id="submitBtn" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-200 transform hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2">
+                                <i data-lucide="save" class="w-5 h-5"></i> <span id="submitBtnText">Sisteme Kaydet</span>
+                            </button>
                         </form>
                     </div>
-                </div>
-                <div class="lg:col-span-1">
-                    <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden sticky top-10 flex flex-col h-[calc(100vh-80px)]">
-                        <div class="p-6 border-b border-slate-100 bg-slate-50/50"><h3 class="font-bold text-slate-700 flex items-center gap-2"><i data-lucide="history" class="w-5 h-5 text-indigo-600"></i> İşlem Geçmişi</h3></div>
-                        <div id="recentActivityList" class="p-6 space-y-4 overflow-y-auto flex-1"><p class="text-sm text-slate-400 text-center py-10 italic">İşlemler burada listelenir.</p></div>
+
+                    <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+                        <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                            <h3 class="font-bold text-slate-700 flex items-center gap-2 uppercase tracking-wider text-sm">
+                                <i data-lucide="list" class="w-5 h-5 text-indigo-600"></i> Mevcut Kayıtlar
+                            </h3>
+                            <span id="listBadge" class="bg-indigo-100 text-indigo-700 text-[10px] px-2.5 py-1 rounded-full font-bold">YÜKLENİYOR...</span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm border-collapse">
+                                <thead class="bg-slate-50 text-slate-500 font-bold uppercase text-[11px]">
+                                    <tr id="tableHead">
+                                        </tr>
+                                </thead>
+                                <tbody id="dataListBody" class="divide-y divide-slate-100">
+                                    </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
+                
+                <div class="lg:col-span-1">
+                    <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden sticky top-10 flex flex-col h-[calc(100vh-80px)]">
+                        <div class="p-6 border-b border-slate-100 bg-slate-50/50">
+                            <h3 class="font-bold text-slate-700 flex items-center gap-2">
+                                <i data-lucide="history" class="w-5 h-5 text-indigo-600"></i> Son İşlemler
+                            </h3>
+                        </div>
+                        <div id="recentActivityList" class="p-6 space-y-4 overflow-y-auto flex-1 custom-scrollbar">
+                            <p class="text-sm text-slate-400 text-center py-10 italic">Henüz bir işlem yapılmadı.</p>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </main>
     </div>
     
     <script>lucide.createIcons();</script>
     <script src="js/global.js"></script>
-<script src="js/tanimlamalar.js"></script>
+    <script src="js/tanimlamalar.js"></script>
 </body>
 </html>

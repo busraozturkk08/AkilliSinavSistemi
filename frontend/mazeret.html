@@ -6,46 +6,105 @@
     <title>SınavAsistan | Hoca Mazeret</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .sidebar-gradient { background: linear-gradient(180deg, #4c1d95 0%, #1e1b4b 100%); }
+        .nav-btn-active { background: rgba(255, 255, 255, 0.15); border-left: 4px solid #a78bfa; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fadeIn { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
 </head>
-<body class="bg-slate-50 text-slate-800">
+<body class="bg-slate-50 text-slate-800 font-sans">
     <div class="flex min-h-screen">
+        
         <aside class="w-72 sidebar-gradient text-white p-6 shadow-2xl flex flex-col sticky top-0 h-screen">
             <div class="flex items-center gap-3 mb-10 px-2">
-                <div class="bg-violet-400 p-2 rounded-xl"><i data-lucide="shield-check" class="text-white"></i></div>
+                <div class="bg-violet-400 p-2 rounded-xl"><i data-lucide="shield-check"></i></div>
                 <h1 class="text-xl font-bold tracking-tight">SınavAsistan</h1>
             </div>
             <nav class="space-y-2 flex-1">
                 <a href="tanimlamalar.html" class="flex items-center gap-3 px-4 py-3 rounded-xl transition hover:bg-white/5 text-violet-200"><i data-lucide="settings" class="w-5 h-5"></i><span>Tanımlamalar</span></a>
-                <a href="mazeret.html" class="nav-btn-active flex items-center gap-3 px-4 py-3 rounded-xl transition"><i data-lucide="user-x" class="w-5 h-5"></i><span>Hoca Mazeret</span></a>
+                <a href="mazeret.html" class="nav-btn-active flex items-center gap-3 px-4 py-3 rounded-xl transition shadow-inner"><i data-lucide="user-x" class="w-5 h-5 text-violet-300"></i><span>Hoca Mazeret</span></a>
                 <a href="planlama.html" class="flex items-center gap-3 px-4 py-3 rounded-xl transition hover:bg-white/5 text-violet-200"><i data-lucide="cpu" class="w-5 h-5"></i><span>Akıllı Planlama</span></a>
                 <a href="takvim.html" class="flex items-center gap-3 px-4 py-3 rounded-xl transition hover:bg-white/5 text-violet-200"><i data-lucide="calendar" class="w-5 h-5"></i><span>Sınav Takvimi</span></a>
             </nav>
+            <div class="mt-auto pt-6 border-t border-white/10 text-[10px] text-violet-300">Giriş Yapıldı: Yönetici (Admin)</div>
         </aside>
 
         <main class="flex-1 p-10 overflow-y-auto animate-fadeIn">
             <header class="mb-8">
                 <h2 class="text-3xl font-extrabold text-slate-800">Personel Mazeretleri</h2>
-                <p class="text-slate-500">Sınav görevi kısıtlarını belirleyin.</p>
+                <p class="text-slate-500 italic">Sınav görevi kısıtlarını dokümana uygun olarak belirleyin.</p>
             </header>
-            <div class="bg-white p-8 rounded-3xl border border-slate-200 max-w-4xl">
-                <form id="mazeretForm" class="space-y-4" onsubmit="handleMazeret(event)">
-                    <div class="space-y-2">
-                        <label for="staffSelect" class="text-sm font-bold text-slate-700">Öğretim Üyesi</label>
-                        <select id="staffSelect" class="w-full p-3 bg-slate-50 border rounded-xl" required>
-                            <option value="">Seçiniz...</option>
-                        </select>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl">
+                
+                <div class="lg:col-span-1 bg-white p-8 rounded-3xl border border-slate-200 shadow-sm h-fit">
+                    <form id="mazeretForm" class="space-y-6" onsubmit="handleMazeretKayit(event)">
+                        
+                        <div class="space-y-2">
+                            <label class="text-sm font-bold text-slate-700">Öğretim Üyesi</label>
+                            <select id="hocaSelect" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-violet-500 transition cursor-pointer" required>
+                                <option value="">Hoca Seçiniz...</option>
+                            </select>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="text-sm font-bold text-slate-700">Mazeret Türü</label>
+                            <select id="mazeretTuru" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-violet-500 transition cursor-pointer" required>
+                                <option value="İzinli (Resmi)">İzinli (Resmi)</option>
+                                <option value="Sağlık Raporu">Sağlık Raporu</option>
+                                <option value="Görevlendirme">Şehir Dışı Görevlendirme</option>
+                                <option value="Farklı Sınav Görevi">Farklı Sınav Görevi</option>
+                            </select>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="text-sm font-bold text-slate-700">Tarih</label>
+                            <input type="date" id="tarihInput" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-violet-500 cursor-pointer" required>
+                        </div>
+
+                        
+
+                        <button type="submit" id="submitBtn" class="w-full bg-violet-600 text-white py-4 rounded-2xl font-bold hover:bg-violet-700 transition-all shadow-lg shadow-violet-200 transform hover:-translate-y-0.5 mt-4">
+                            Mazereti Kaydet
+                        </button>
+                    </form>
+                </div>
+
+                <div class="lg:col-span-2 bg-white p-8 rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[calc(100vh-150px)]">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="font-bold text-lg text-slate-800 tracking-tight">Kayıtlı Mazeretler</h3>
+                        <span class="px-3 py-1 bg-slate-100 text-slate-500 text-[10px] font-bold rounded-full uppercase" id="kayitSayaci">0 Kayıt</span>
                     </div>
-                    <div class="space-y-2">
-                        <label for="mazeretDate" class="text-sm font-bold text-slate-700">Tarih</label>
-                        <input type="date" id="mazeretDate" class="w-full p-3 bg-slate-50 border rounded-xl" required>
+                    
+                    <div class="overflow-x-auto flex-1 custom-scrollbar">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-slate-100 text-slate-400 text-[11px] uppercase tracking-widest font-bold">
+                                    <th class="py-4 px-2">Hoca</th>
+                                    <th class="py-4 px-2">Tür</th>
+                                    <th class="py-4 px-2">Zaman Dilimi</th>
+                                    <th class="py-4 px-2 text-right">Eylem</th>
+                                </tr>
+                            </thead>
+                            <tbody id="mazeretListe" class="text-sm">
+                                <tr id="emptyMsg">
+                                    <td colspan="4" class="text-center py-10 text-slate-400 italic text-sm border-none">
+                                        <i data-lucide="inbox" class="w-10 h-10 mx-auto text-slate-300 mb-2"></i>
+                                        Henüz bir mazeret kaydı bulunmuyor.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
-                    <button type="submit" class="w-full bg-violet-600 text-white py-4 rounded-2xl font-bold hover:bg-violet-700 shadow-lg">Mazereti İşle</button>
-                </form>
+                </div>
+
             </div>
         </main>
     </div>
-   
+    
     <script>lucide.createIcons();</script>
+    <script src="js/global.js"></script> 
+    <script src="js/mazeret.js"></script>
 </body>
 </html>

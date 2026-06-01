@@ -7,36 +7,78 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        .sidebar-gradient { background: linear-gradient(180deg, #4c1d95 0%, #1e1b4b 100%); }
+        .nav-btn-active { background: rgba(255, 255, 255, 0.15); border-left: 4px solid #a78bfa; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fadeIn { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
 </head>
-<body class="bg-slate-50 text-slate-800">
+<body class="bg-slate-50 text-slate-800 font-sans">
     <div class="flex min-h-screen">
+        
         <aside class="w-72 sidebar-gradient text-white p-6 shadow-2xl flex flex-col sticky top-0 h-screen">
-            <div class="flex items-center gap-3 mb-10 px-2"><div class="bg-violet-400 p-2 rounded-xl"><i data-lucide="shield-check" class="text-white"></i></div><h1 class="text-xl font-bold tracking-tight">SınavAsistan</h1></div>
+            <div class="flex items-center gap-3 mb-10 px-2">
+                <div class="bg-violet-400 p-2 rounded-xl"><i data-lucide="shield-check" class="text-white"></i></div>
+                <h1 class="text-xl font-bold tracking-tight">SınavAsistan</h1>
+            </div>
             <nav class="space-y-2 flex-1">
                 <a href="tanimlamalar.html" class="flex items-center gap-3 px-4 py-3 rounded-xl transition hover:bg-white/5 text-violet-200"><i data-lucide="settings" class="w-5 h-5"></i><span>Tanımlamalar</span></a>
                 <a href="mazeret.html" class="flex items-center gap-3 px-4 py-3 rounded-xl transition hover:bg-white/5 text-violet-200"><i data-lucide="user-x" class="w-5 h-5"></i><span>Hoca Mazeret</span></a>
-                <a href="planlama.html" class="nav-btn-active flex items-center gap-3 px-4 py-3 rounded-xl transition"><i data-lucide="cpu" class="w-5 h-5"></i><span>Akıllı Planlama</span></a>
+                <a href="planlama.html" class="nav-btn-active flex items-center gap-3 px-4 py-3 rounded-xl transition shadow-inner"><i data-lucide="cpu" class="w-5 h-5 text-violet-300"></i><span>Akıllı Planlama</span></a>
                 <a href="takvim.html" class="flex items-center gap-3 px-4 py-3 rounded-xl transition hover:bg-white/5 text-violet-200"><i data-lucide="calendar" class="w-5 h-5"></i><span>Sınav Takvimi</span></a>
             </nav>
+            <div class="mt-auto p-4 bg-white/5 rounded-2xl border border-white/10 text-xs">
+                <p class="text-violet-300">Giriş Yapıldı: <span class="text-white font-bold">Yönetici (Admin)</span></p>
+            </div>
         </aside>
 
         <main class="flex-1 p-10 overflow-y-auto animate-fadeIn">
-            <header class="mb-8"><h2 class="text-3xl font-extrabold text-slate-800">Akıllı Salon Planlama</h2></header>
-            <div class="bg-white p-8 rounded-3xl border border-slate-200 max-w-4xl">
-                <div class="p-6 bg-indigo-50 border-l-4 border-indigo-500 rounded-2xl mb-6">
-                    <h4 class="font-bold text-indigo-900 text-lg">YZM 2126 - Veritabanı Sistemleri</h4>
-                    <p class="text-indigo-700">Öğrenci Sayısı: 132</p>
+            <header class="mb-8 text-center max-w-2xl mx-auto">
+                <h2 class="text-3xl font-extrabold text-slate-800">Akıllı Salon Planlama</h2>
+                <p class="text-slate-500 mt-2">Ders kontenjanına göre en verimli salon kombinasyonunu oluşturun ve atamayı yapın.</p>
+            </header>
+
+            <div class="max-w-2xl mx-auto">
+                <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm h-fit">
+                    <div class="space-y-6"> 
+                        <div class="space-y-2">
+                            <label class="text-sm font-semibold text-slate-700">Planlanacak Dersi Seçin</label>
+                            <select id="courseSelect" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none text-lg font-medium focus:ring-2 focus:ring-indigo-500 transition-all cursor-pointer">
+                                <option value="">Dersler yükleniyor...</option>
+                            </select>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="space-y-2">
+                                <label class="text-sm font-semibold text-slate-700">Sınav Tarihi</label>
+                                <input type="date" id="examDate" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none text-lg font-medium focus:ring-2 focus:ring-indigo-500 transition-all cursor-pointer">
+                            </div>
+                            
+                            <div class="space-y-2">
+                                <label class="text-sm font-semibold text-slate-700">Oturum</label>
+                                <select id="sessionSelect" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none text-lg font-medium focus:ring-2 focus:ring-indigo-500 transition-all cursor-pointer">
+                                    <option value="">Oturumlar yükleniyor...</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div id="courseInfo" class="hidden p-4 bg-indigo-50 border-l-4 border-indigo-500 rounded-xl">
+                            <p id="selectedCourseName" class="font-bold text-indigo-900"></p>
+                            <p class="text-indigo-700">Kontenjan: <span id="selectedCourseCap" class="font-bold"></span> Öğrenci</p>
+                        </div>
+
+                        <button onclick="calculatePlanning()" id="calcBtn" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-200 transform hover:-translate-y-0.5 flex items-center justify-center gap-2 transition-all mt-4">
+                            <i data-lucide="sparkles" class="w-5 h-5"></i> Kombinasyon Hesapla ve Ata
+                        </button>
+                    </div>
                 </div>
-                <button onclick="calculatePlanning()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold hover:bg-indigo-700 shadow-lg flex items-center justify-center gap-2">
-                    <i data-lucide="sparkles" class="w-5 h-5"></i> Kombinasyon Hesapla
-                </button>
-                <div id="planResult" class="hidden mt-8 space-y-4"><div id="oneriListe" class="space-y-3"></div></div>
             </div>
         </main>
     </div>
     
     <script>lucide.createIcons();</script>
     <script src="js/global.js"></script>
-<script src="js/planlama.js"></script>
+    <script src="js/planlama.js"></script>
 </body>
 </html>
